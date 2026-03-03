@@ -121,7 +121,7 @@ export default function ProductPage() {
                   }
                 }}
                 alt={product.name}
-                className="absolute w-[80%] h-[80%] object-contain mix-blend-multiply cursor-grab active:cursor-grabbing transition-transform duration-500 scale-110 sm:scale-125"
+                className="absolute w-[80%] h-[80%] object-contain mix-blend-multiply cursor-grab active:cursor-grabbing transition-transform duration-500 scale-125 sm:scale-140"
               />
             </AnimatePresence>
 

@@ -122,7 +122,7 @@ export default function Home() {
                   <img
                     src={product.variants[0].image}
                     alt={product.name}
-                    className="w-full h-auto object-contain mix-blend-multiply scale-110 group-hover:scale-125 transition-transform duration-700"
+                    className="w-full h-auto object-contain mix-blend-multiply scale-120 group-hover:scale-140 transition-transform duration-700"
                   />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                     Quick View
