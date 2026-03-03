@@ -1,33 +1,33 @@
-import img8080BLK_C from "@assets/products/8080_BLK_C.png";
-import img8080BLK_L from "@assets/products/8080_BLK_L.png";
-import img8080BLK_R from "@assets/products/8080_BLK_R.png";
-import img8080BRN_C from "@assets/products/8080_BRN_C.png";
-import img8080BRN_L from "@assets/products/8080_BRN_L.png";
-import img8080BRN_R from "@assets/products/8080_BRN_R.png";
+import img8080BLK_C from "@assets/products/8080_BLK_C.webp";
+import img8080BLK_L from "@assets/products/8080_BLK_L.webp";
+import img8080BLK_R from "@assets/products/8080_BLK_R.webp";
+import img8080BRN_C from "@assets/products/8080_BRN_C.webp";
+import img8080BRN_L from "@assets/products/8080_BRN_L.webp";
+import img8080BRN_R from "@assets/products/8080_BRN_R.webp";
 
-import img8079BLK_C from "@assets/products/8079_BLK_C.png";
-import img8079BLK_L from "@assets/products/8079_BLK_L.png";
-import img8079BLK_R from "@assets/products/8079_BLK_R.png";
-import img8079BRN_C from "@assets/products/8079_BRN_C.png";
-import img8079BRN_L from "@assets/products/8079_BRN_L.png";
-import img8079BRN_R from "@assets/products/8079_BRN_R.png";
+import img8079BLK_C from "@assets/products/8079_BLK_C.webp";
+import img8079BLK_L from "@assets/products/8079_BLK_L.webp";
+import img8079BLK_R from "@assets/products/8079_BLK_R.webp";
+import img8079BRN_C from "@assets/products/8079_BRN_C.webp";
+import img8079BRN_L from "@assets/products/8079_BRN_L.webp";
+import img8079BRN_R from "@assets/products/8079_BRN_R.webp";
 
-import img8077BLK_C from "@assets/products/8077_BLK_C.png";
-import img8077BLK_L from "@assets/products/8077_BLK_L.png";
-import img8077BLK_R from "@assets/products/8077_BLK_R.png";
-import img8077BRN_C from "@assets/products/8077_BRN_C.png";
-import img8077BRN_L from "@assets/products/8077_BRN_L.png";
-import img8077BRN_R from "@assets/products/8077_BRN_R.png";
+import img8077BLK_C from "@assets/products/8077_BLK_C.webp";
+import img8077BLK_L from "@assets/products/8077_BLK_L.webp";
+import img8077BLK_R from "@assets/products/8077_BLK_R.webp";
+import img8077BRN_C from "@assets/products/8077_BRN_C.webp";
+import img8077BRN_L from "@assets/products/8077_BRN_L.webp";
+import img8077BRN_R from "@assets/products/8077_BRN_R.webp";
 
-import img8076BLK_C from "@assets/products/8076_BLK_C.png";
-import img8076BLK_R from "@assets/products/8076_BLK_R.png";
+import img8076BLK_C from "@assets/products/8076_BLK_C.webp";
+import img8076BLK_R from "@assets/products/8076_BLK_R.webp";
 
-import img8075BLK_C from "@assets/products/8075_BLK_C.png";
-import img8075BLK_L from "@assets/products/8075_BLK_L.png";
-import img8075BLK_R from "@assets/products/8075_BLK_R.png";
-import img8075BRN_C from "@assets/products/8075_BRN_C.png";
-import img8075BRN_L from "@assets/products/8075_BRN_L.png";
-import img8075BRN_R from "@assets/products/8075_BRN_R.png";
+import img8075BLK_C from "@assets/products/8075_BLK_C.webp";
+import img8075BLK_L from "@assets/products/8075_BLK_L.webp";
+import img8075BLK_R from "@assets/products/8075_BLK_R.webp";
+import img8075BRN_C from "@assets/products/8075_BRN_C.webp";
+import img8075BRN_L from "@assets/products/8075_BRN_L.webp";
+import img8075BRN_R from "@assets/products/8075_BRN_R.webp";
 
 export const products = [
     {

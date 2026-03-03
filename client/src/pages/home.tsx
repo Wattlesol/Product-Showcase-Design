@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState } from "react";
 import { products } from "@/lib/data";
-import imgBlackShoeNoBg from "@assets/products/8080_BLK_L.png";
+import imgBlackShoeNoBg from "@assets/products/8080_BLK_L.webp";
 
 export default function Home() {
   const [, setLocation] = useLocation();

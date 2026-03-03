@@ -7,12 +7,23 @@ import { useToast } from "@/hooks/use-toast";
 import { products } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
 
+import { useQuery } from "@tanstack/react-query";
+
 export default function ProductPage() {
   const [, params] = useRoute("/product/:id");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { addItem, items } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
+
+  const { data: inventoryData } = useQuery<Record<string, Record<string, number>>>({
+    queryKey: ['inventory'],
+    queryFn: async () => {
+      const res = await fetch('/api/inventory');
+      if (!res.ok) return null as any;
+      return res.json() as Promise<Record<string, Record<string, number>>>;
+    }
+  });
 
   const product = products.find(p => p.id === Number(params?.id)) || products[0];
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
@@ -193,18 +204,22 @@ export default function ProductPage() {
               <div>
                 <label className="block text-sm font-bold uppercase tracking-wider mb-4">Select Size</label>
                 <div className="grid grid-cols-4 gap-3">
-                  {["6", "7", "8", "9", "10", "11"].map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`h-12 border rounded-xl font-medium transition-all ${selectedSize === size
-                        ? 'border-black bg-black text-white'
-                        : 'border-gray-200 hover:border-black'
-                        }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {["6", "7", "8", "9", "10", "11"].map((size) => {
+                    const isOutOfStock = inventoryData && inventoryData[selectedVariant.id] && inventoryData[selectedVariant.id][size] <= 0;
+                    return (
+                      <button
+                        key={size}
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSize(size)}
+                        className={`h-12 border rounded-xl font-medium transition-all 
+                          ${selectedSize === size ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-black'}
+                          ${isOutOfStock ? 'opacity-30 cursor-not-allowed line-through hover:border-gray-200' : ''}
+                        `}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

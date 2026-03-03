@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { google } from "googleapis";
 import path from "path";
 import fs from "fs";
+import { currentInventory } from "./inventory";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -11,17 +12,21 @@ export async function registerRoutes(
 ): Promise<Server> {
   // put application routes here
   // prefix all routes with /api
-  
+
+  app.get("/api/inventory", (req, res) => {
+    res.json(currentInventory);
+  });
+
   app.post("/api/checkout", async (req, res) => {
     try {
       const { order, shipping, totalPrice } = req.body;
-      
+
       const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
-      
+
       // Attempt to load credentials
       let auth;
       const credsPath = path.join(process.cwd(), "server", "credentials.json");
-      
+
       if (fs.existsSync(credsPath)) {
         // We use a try/catch here to avoid crashing if credentials are dummy
         try {
@@ -36,7 +41,7 @@ export async function registerRoutes(
 
       if (auth) {
         const sheets = google.sheets({ version: "v4", auth });
-        
+
         // Append row to Google Sheets
         await sheets.spreadsheets.values.append({
           spreadsheetId,
@@ -52,8 +57,7 @@ export async function registerRoutes(
                 shipping.address,
                 shipping.city,
                 shipping.province,
-                order.name,
-                order.color,
+                order.map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size})`).join(",\n"),
                 totalPrice
               ],
             ],
@@ -61,6 +65,13 @@ export async function registerRoutes(
         });
       } else {
         console.warn("Google Sheets credentials not found/invalid. Skipping sheet update in dev mode.");
+      }
+
+      // Decrement inventory
+      for (const item of order) {
+        if (currentInventory[item.variantId] && currentInventory[item.variantId][item.size] !== undefined) {
+          currentInventory[item.variantId][item.size] = Math.max(0, currentInventory[item.variantId][item.size] - item.quantity);
+        }
       }
 
       res.status(200).json({ success: true, message: "Order processed successfully" });
