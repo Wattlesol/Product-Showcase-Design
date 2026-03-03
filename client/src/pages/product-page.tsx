@@ -193,7 +193,7 @@ export default function ProductPage() {
               <div>
                 <label className="block text-sm font-bold uppercase tracking-wider mb-4">Select Size</label>
                 <div className="grid grid-cols-4 gap-3">
-                  {["7", "8", "9", "10", "11", "12"].map((size) => (
+                  {["6", "7", "8", "9", "10", "11"].map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
