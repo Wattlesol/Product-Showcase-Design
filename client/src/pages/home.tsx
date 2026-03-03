@@ -122,7 +122,7 @@ export default function Home() {
                   <img
                     src={product.variants[0].image}
                     alt={product.name}
-                    className="w-full h-auto object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-auto object-contain mix-blend-multiply scale-110 group-hover:scale-125 transition-transform duration-700"
                   />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                     Quick View
@@ -130,8 +130,11 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-lg tracking-tight">{product.name}</h3>
-                    <span className="font-bold">PKR {product.price.toFixed(2)}</span>
+                    <h3 className="font-bold text-sm leading-tight">{product.name}</h3>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</span>
+                      <span className="font-bold text-sm">PKR {product.price.toFixed(2)}</span>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-1.5">

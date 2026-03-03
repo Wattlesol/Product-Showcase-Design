@@ -121,7 +121,7 @@ export default function ProductPage() {
                   }
                 }}
                 alt={product.name}
-                className="absolute w-3/4 h-3/4 object-contain mix-blend-multiply cursor-grab active:cursor-grabbing"
+                className="absolute w-[80%] h-[80%] object-contain mix-blend-multiply cursor-grab active:cursor-grabbing transition-transform duration-500 scale-110 sm:scale-125"
               />
             </AnimatePresence>
 
@@ -169,7 +169,10 @@ export default function ProductPage() {
                 <span className="text-sm font-medium text-gray-500">({product.rating} / 5.0)</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 tracking-tight">{product.name}</h1>
-              <p className="text-3xl font-light text-gray-900">PKR {product.price.toFixed(2)}</p>
+              <div className="flex items-baseline gap-3 mb-4">
+                <p className="text-3xl font-bold text-gray-900">PKR {product.price.toFixed(2)}</p>
+                <p className="text-xl text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</p>
+              </div>
             </div>
 
             <div className="mb-8 pb-8 border-b border-gray-100">

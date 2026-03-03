@@ -116,7 +116,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                                     <span className="text-gray-500">Subtotal</span>
                                     <span className="font-bold text-lg">PKR {subtotal.toFixed(2)}</span>
                                 </div>
-                                <p className="text-xs text-gray-500 text-center">Shipping and taxes calculated at checkout</p>
+                                <p className="text-xs text-green-600 font-medium text-center italic">Free Shipping on all orders!</p>
                                 <Button
                                     onClick={handleCheckout}
                                     className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl shadow-black/10"
