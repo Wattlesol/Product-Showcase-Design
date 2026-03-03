@@ -4,3 +4,10 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+.local
+.venv
+server/credentials.json
+newProductImages
+attached_assets/*
+!attached_assets/products/
+!attached_assets/products/*.png

@@ -2,60 +2,47 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, Star, ArrowRight, ShieldCheck, Truck, RefreshCw } from "lucide-react";
 import { useLocation } from "wouter";
-import img8080BRN from "@assets/8080_-_8_BRN_1772297418005.png";
-import img8080BLK from "@assets/8080_-_8_BKL_1772297418005.png";
-import img8079BRN from "@assets/8079_-_8_BRN_1772297418006.png";
-import img8079BLK from "@assets/8079_-_8_BLK_1772297418006.png";
-import img8077BLK from "@assets/8077_-_9_BLK_1772297418006.png";
-import img8077BRN from "@assets/8077_-_8_BRN_1772297418006.png";
-import img8076BLK from "@assets/8076_-_8_BLK_1772297418006.png";
-import img8075BRN from "@assets/8075_-_8_BRN_1772297418006.png";
-import img8075BLK from "@assets/8075_-_8_BLK_1772297418006.png";
-
-const products = [
-  { id: 1, name: "Model 8080 Classic Slip-On", color: "Brown", price: "$89.00", image: img8080BRN, rating: 4.8 },
-  { id: 2, name: "Model 8080 Classic Slip-On", color: "Black", price: "$89.00", image: img8080BLK, rating: 4.9 },
-  { id: 3, name: "Model 8079 Comfort Loafer", color: "Brown", price: "$95.00", image: img8079BRN, rating: 4.7 },
-  { id: 4, name: "Model 8079 Comfort Loafer", color: "Black", price: "$95.00", image: img8079BLK, rating: 4.8 },
-  { id: 5, name: "Model 8077 Executive Mocc", color: "Black", price: "$110.00", image: img8077BLK, rating: 5.0 },
-  { id: 6, name: "Model 8077 Executive Mocc", color: "Brown", price: "$110.00", image: img8077BRN, rating: 4.9 },
-  { id: 7, name: "Model 8076 Woven Detail", color: "Black", price: "$105.00", image: img8076BLK, rating: 4.6 },
-  { id: 8, name: "Model 8075 Modern Loafer", color: "Brown", price: "$99.00", image: img8075BRN, rating: 4.7 },
-  { id: 9, name: "Model 8075 Modern Loafer", color: "Black", price: "$99.00", image: img8075BLK, rating: 4.8 },
-];
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { useState } from "react";
+import { products } from "@/lib/data";
+import imgBlackShoeNoBg from "@assets/products/8080_BLK_L.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [introFinished, setIntroFinished] = useState(false);
+
+  // Mouse tracking
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Map limits for rotation (adjust max rotation degrees here)
+  const rotateX = useTransform(mouseY, [-500, 500], [15, -15]);
+  const rotateY = useTransform(mouseX, [-500, 500], [-35, 35]);
+
+  // Smooth rotation
+  const smoothRotateX = useSpring(rotateX, { damping: 20, stiffness: 100 });
+  const smoothRotateY = useSpring(rotateY, { damping: 20, stiffness: 100 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!introFinished) return;
+    const { innerWidth, innerHeight } = window;
+    const x = e.clientX - innerWidth / 2;
+    const y = e.clientY - innerHeight / 2;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header Promo */}
-      <div className="bg-black text-white py-2 px-4 text-center">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Free express shipping on all orders this week</p>
-      </div>
-      
-      {/* Navigation */}
-      <nav className="border-b border-gray-100 sticky top-0 bg-white/80 backdrop-blur-md z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-heading font-bold text-2xl tracking-tighter cursor-pointer" onClick={() => setLocation("/")}>LUMINA</span>
-          </div>
-          <div className="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
-            <a href="#collection" className="hover:text-black transition-colors">Collection</a>
-            <a href="/shop" className="hover:text-black transition-colors">Men</a>
-            <a href="/shop" className="hover:text-black transition-colors">Accessories</a>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative" data-testid="button-cart">
-              <ShoppingCart className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-black rounded-full"></span>
-            </Button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gray-50 pt-16 pb-24 lg:pt-24 lg:pb-32">
+      <section
+        className="relative overflow-hidden bg-gray-50 pt-16 pb-24 lg:pt-24 lg:pb-32"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => {
+          mouseX.set(0);
+          mouseY.set(0);
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="max-w-2xl">
@@ -63,7 +50,7 @@ export default function Home() {
                 New Collection 2026
               </span>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
-                Step into <br/>
+                Step into <br />
                 <span className="text-gray-400">Effortless</span> Comfort
               </h1>
               <p className="text-lg text-gray-600 mb-8 max-w-lg leading-relaxed">
@@ -76,14 +63,43 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-gray-50 rounded-full blur-3xl opacity-50 aspect-square animate-pulse"></div>
-              <img 
-                src={img8080BRN} 
-                alt="Featured Shoe" 
-                className="relative z-10 w-full h-auto drop-shadow-2xl hover:-translate-y-2 transition-transform duration-500 mix-blend-multiply"
-              />
+
+            <div className="relative group perspective-[2000px] flex justify-center items-center min-h-[400px]">
+              <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-gray-50 rounded-full blur-3xl opacity-50 aspect-square animate-[pulse_4s_ease-in-out_infinite]"></div>
+
+              <motion.div
+                className="relative z-10 w-full max-w-lg cursor-grab active:cursor-grabbing"
+                style={{
+                  rotateX: introFinished ? smoothRotateX : 0,
+                  rotateY: introFinished ? smoothRotateY : 0,
+                  transformStyle: "preserve-3d"
+                }}
+              >
+                <motion.div
+                  animate={{ y: ["-3%", "3%"] }}
+                  transition={{ duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  <motion.img
+                    src={imgBlackShoeNoBg}
+                    alt="Featured 3D Shoe"
+                    className="w-full h-auto drop-shadow-[0_25px_35px_rgba(0,0,0,0.4)] object-contain"
+                    initial={{ x: 300, scale: 0.2, opacity: 0, rotateY: 45 }}
+                    animate={introFinished
+                      ? { rotateZ: [-2, 2], scale: 1, opacity: 1, x: 0, rotateY: 0 }
+                      : { x: 0, scale: 1, opacity: 1, rotateY: 0 }
+                    }
+                    transition={
+                      introFinished
+                        ? { rotateZ: { duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" } }
+                        : { duration: 1.2, ease: [0.16, 1, 0.3, 1] }
+                    }
+                    onAnimationComplete={() => setIntroFinished(true)}
+                    whileHover={{ scale: 1.05 }}
+                    style={{ transformStyle: "preserve-3d", originX: 0.5, originY: 0.5 }}
+                  />
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -103,9 +119,9 @@ export default function Home() {
             {products.map((product) => (
               <div key={product.id} className="group cursor-pointer" onClick={() => setLocation(`/product/${product.id}`)}>
                 <div className="relative aspect-[4/3] bg-gray-50 rounded-3xl mb-4 overflow-hidden flex items-center justify-center p-6 border border-gray-100 group-hover:bg-gray-100 transition-all duration-500">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
+                  <img
+                    src={product.variants[0].image}
+                    alt={product.name}
                     className="w-full h-auto object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
@@ -115,10 +131,20 @@ export default function Home() {
                 <div>
                   <div className="flex justify-between items-start mb-1">
                     <h3 className="font-bold text-lg tracking-tight">{product.name}</h3>
-                    <span className="font-bold">{product.price}</span>
+                    <span className="font-bold">PKR {product.price.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <p className="text-gray-500">{product.color}</p>
+                    <div className="flex items-center gap-1.5">
+                      {product.variants.map(variant => (
+                        <div
+                          key={variant.id}
+                          className="w-4 h-4 rounded-full border border-gray-300"
+                          style={{ backgroundColor: variant.colorCode }}
+                          title={variant.color}
+                        />
+                      ))}
+                      <span className="text-gray-500 text-xs ml-1">{product.variants.length} Color{product.variants.length !== 1 ? 's' : ''}</span>
+                    </div>
                     <div className="flex items-center text-gray-400">
                       <Star className="w-3.5 h-3.5 fill-current text-yellow-500 mr-1" />
                       {product.rating}
