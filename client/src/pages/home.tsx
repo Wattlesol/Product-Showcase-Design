@@ -83,7 +83,7 @@ export default function Home() {
                   <motion.img
                     src={imgBlackShoeNoBg}
                     alt="Featured 3D Shoe"
-                    className="w-full h-auto drop-shadow-[0_25px_35px_rgba(0,0,0,0.4)] object-contain"
+                    className="w-full h-auto drop-shadow-[0_25px_35px_rgba(0,0,0,0.4)] object-contain mix-blend-multiply"
                     initial={{ x: 300, scale: 0.2, opacity: 0, rotateY: 45 }}
                     animate={introFinished
                       ? { rotateZ: [-2, 2], scale: 1, opacity: 1, x: 0, rotateY: 0 }
