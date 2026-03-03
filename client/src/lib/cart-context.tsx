@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { products } from "./data";
 
 export interface CartItem {
     id: number;
@@ -31,7 +32,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const savedCart = localStorage.getItem("lumina_cart");
         if (savedCart) {
             try {
-                setItems(JSON.parse(savedCart));
+                const parsedCart = JSON.parse(savedCart) as CartItem[];
+                // Sync prices with latest product data
+                const syncedCart = parsedCart.map(item => {
+                    const product = products.find(p => p.id === item.id);
+                    if (product && product.price !== item.price) {
+                        return { ...item, price: product.price };
+                    }
+                    return item;
+                });
+                setItems(syncedCart);
             } catch (e) {
                 console.error("Failed to parse cart from localStorage", e);
             }
