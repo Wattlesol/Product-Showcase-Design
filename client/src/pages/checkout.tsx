@@ -83,7 +83,7 @@ export default function Checkout() {
         body: JSON.stringify({
           order: items, // Sending all items
           shipping: formData,
-          totalPrice: subtotal + 200 // Including shipping fee
+          totalPrice: subtotal // Free shipping
         }),
       });
 
@@ -108,7 +108,7 @@ export default function Checkout() {
 
           gtag('event', 'purchase', {
             transaction_id: `T_${Date.now()}`,
-            value: subtotal + 200,
+            value: subtotal,
             currency: 'PKR',
             user_data: {
               sha256_phone_number: hashedPhone,
@@ -322,7 +322,7 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Shipping</span>
-                      <span className="text-black font-medium">PKR 200.00</span>
+                      <span className="text-black font-medium text-green-600">Free</span>
                     </div>
                   </div>
 
@@ -333,7 +333,7 @@ export default function Checkout() {
                     </div>
                     <div className="text-2xl font-bold tracking-tight text-right">
                       <span className="text-xs text-gray-400 font-normal mr-2">PKR</span>
-                      {(subtotal + 200).toFixed(2)}
+                      {(subtotal).toFixed(2)}
                     </div>
                   </div>
                 </CardContent>
