@@ -1,0 +1,80 @@
+<section class="relative h-[80vh] flex items-center overflow-hidden bg-white">
+  <div class="absolute inset-0 z-0">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 2000 | image_tag: class: 'h-full w-full object-cover grayscale opacity-50' }}
+    {%- else -%}
+      <div class="h-full w-full bg-gray-100"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+    <div class="max-w-2xl">
+      {%- if section.settings.subheading != blank -%}
+        <span class="inline-block text-xs font-bold uppercase tracking-[0.3em] text-gray-400 mb-6 animate-fade-in">
+          {{ section.settings.subheading }}
+        </span>
+      {%- endif -%}
+      
+      <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9] mb-8 animate-slide-up">
+        {{ section.settings.title }}
+      </h1>
+
+      <p class="text-lg text-gray-600 mb-10 leading-relaxed max-w-lg">
+        {{ section.settings.description }}
+      </p>
+
+      <div class="flex flex-wrap gap-4">
+        <a href="{{ section.settings.button_link }}" class="group relative inline-flex h-14 items-center justify-center overflow-hidden rounded-full bg-black px-10 font-medium text-white transition-all hover:scale-105 active:scale-95">
+          <span class="relative z-10">{{ section.settings.button_label }}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Hero Image"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Premium Collection 2026"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "Title",
+      "default": "<p>Step into <br /><span class='text-gray-400'>Effortless</span> Comfort</p>"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Reimagining classic silhouettes with unparalleled ergonomics and premium materials."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button Label",
+      "default": "Explore Collection"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,88 @@
+<section class="py-24 bg-white overflow-hidden">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row items-end justify-between mb-16 gap-4">
+      <div class="max-w-2xl">
+        <h2 class="text-4xl md:text-6xl font-bold tracking-tighter mb-4">{{ section.settings.title }}</h2>
+        <p class="text-lg text-gray-500">{{ section.settings.description }}</p>
+      </div>
+      <a href="{{ section.settings.collection.url }}" class="flex items-center gap-2 group font-medium border-b border-black pb-1 hover:gap-4 transition-all">
+        View All Products
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+      {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+        <div class="group cursor-pointer">
+          <a href="{{ product.url }}">
+            <div class="relative aspect-square bg-gray-50 rounded-3xl p-8 mb-6 overflow-hidden border border-gray-100 group-hover:bg-gray-100 transition-colors">
+              <img src="{{ product.featured_image | image_url: width: 800 }}" alt="{{ product.title }}" class="w-full h-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-110">
+              <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+            
+            <h3 class="font-bold text-lg mb-1">{{ product.title }}</h3>
+            <p class="text-sm text-gray-500 mb-3">{{ product.type }}</p>
+            <div class="flex items-center justify-between">
+              <p class="font-bold">PKR {{ product.price | money_without_currency }}</p>
+              {%- if product.compare_at_price > product.price -%}
+                <p class="text-sm text-gray-400 line-through">PKR {{ product.compare_at_price | money_without_currency }}</p>
+              {%- endif -%}
+            </div>
+          </a>
+        </div>
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="group opacity-40 grayscale">
+            <div class="relative aspect-square bg-gray-100 rounded-3xl p-8 mb-6 overflow-hidden border border-gray-200">
+              <div class="w-full h-full bg-gray-200"></div>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Product Title</h3>
+            <p class="text-sm text-gray-500 mb-3">Category</p>
+            <p class="font-bold">PKR 4999.00</p>
+          </div>
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Signature Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Our most appreciated models, designed for durability and refined aesthetics."
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 12,
+      "step": 4,
+      "default": 4,
+      "label": "Products to show"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection"
+    }
+  ]
+}
+{% endschema %}

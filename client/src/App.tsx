@@ -11,15 +11,21 @@ import Blog from "@/pages/blog.tsx";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { CartProvider } from "./lib/cart-context";
+import { useTracker } from "@/hooks/use-tracker";
+
+import AdminLogin from "@/pages/admin/login";
+import AdminDashboard from "@/pages/admin/dashboard";
 
 function Router() {
+  useTracker();
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/product/:id" component={ProductPage} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/blog" component={Blog} />
-      {/* Fallback to 404 */}
+      <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

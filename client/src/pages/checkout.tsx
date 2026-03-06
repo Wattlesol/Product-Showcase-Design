@@ -58,7 +58,25 @@ export default function Checkout() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
+    const newFormData = { ...formData, [id]: value };
+    setFormData(newFormData);
+
+    // Track Lead on change with keepalive for reliability
+    const sessionId = sessionStorage.getItem("lumina_session");
+    if (sessionId) {
+      fetch("/api/track/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          ...newFormData,
+          cartItems: items,
+          totalPrice: subtotal
+        }),
+        keepalive: true, // Crucial for capturing data on tab close
+      }).catch(console.error);
+    }
+
     // Clear error when user types
     if (formErrors[id]) {
       setFormErrors(prev => ({ ...prev, [id]: '' }));
@@ -124,7 +142,10 @@ export default function Checkout() {
         },
         body: JSON.stringify({
           order: items, // Sending all items
-          shipping: formData,
+          shipping: {
+            ...formData,
+            sessionId: sessionStorage.getItem("lumina_session")
+          },
           totalPrice: subtotal // Free shipping
         }),
       });
@@ -185,7 +206,7 @@ export default function Checkout() {
         const ttq = window.ttq;
         if (ttq) {
           const hashedPhone = await hashData(formData.phone);
-          
+
           ttq.identify({
             "phone_number": hashedPhone,
           });
@@ -203,7 +224,7 @@ export default function Checkout() {
             "value": subtotal,
             "currency": "PKR"
           });
-          
+
           ttq.track("PlaceAnOrder", {
             "contents": ttqContents,
             "value": subtotal,

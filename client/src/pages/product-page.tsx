@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { products } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
+import { useTracker } from "@/hooks/use-tracker";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,6 +15,7 @@ export default function ProductPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { addItem, items } = useCart();
+  const { trackEvent } = useTracker({ skipHit: true });
   const [selectedSize, setSelectedSize] = useState("");
 
   const { data: inventoryData } = useQuery<Record<string, Record<string, number>>>({
@@ -35,6 +37,11 @@ export default function ProductPage() {
   // Track product view
   useEffect(() => {
     if (product) {
+      trackEvent("view_item", {
+        productId: String(product.id),
+        productName: product.name,
+        metadata: { price: product.price }
+      });
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
@@ -56,7 +63,8 @@ export default function ProductPage() {
   }, [product]);
 
   const handleAddToCart = () => {
-    addItem({
+    // Build the new item to add
+    const newItem = {
       id: product.id,
       variantId: selectedVariant.id,
       name: product.name,
@@ -64,6 +72,42 @@ export default function ProductPage() {
       image: selectedVariant.image,
       color: selectedVariant.color,
       size: selectedSize,
+    };
+
+    addItem(newItem);
+
+    // Compute what the cart will look like after this add
+    const existingIndex = items.findIndex(
+      i => i.variantId === newItem.variantId && i.size === newItem.size
+    );
+    const updatedCart = existingIndex > -1
+      ? items.map((i, idx) => idx === existingIndex ? { ...i, quantity: i.quantity + 1 } : i)
+      : [...items, { ...newItem, quantity: 1 }];
+
+    // Sync current cart to lead record so dashboard always shows real cart
+    const sessionId = sessionStorage.getItem("lumina_session");
+    if (sessionId) {
+      const subtotal = updatedCart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      fetch("/api/track/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          cartItems: updatedCart,
+          totalPrice: subtotal,
+        }),
+        keepalive: true,
+      }).catch(console.error);
+    }
+
+    trackEvent("add_to_cart", {
+      productId: String(product.id),
+      productName: product.name,
+      metadata: {
+        variantId: selectedVariant.id,
+        size: selectedSize,
+        price: product.price
+      }
     });
 
     toast({

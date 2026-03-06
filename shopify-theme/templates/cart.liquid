@@ -1,0 +1,17 @@
+<div class="page-width">
+  <div class="cart__footer">
+    <div class="cart__blocks">
+      <div class="cart__ctas">
+        <noscript>
+          <button type="submit" class="cart__update-button button button--secondary" form="cart">
+            {{ 'sections.cart.update' | t }}
+          </button>
+        </noscript>
+
+        <button type="submit" id="checkout" class="cart__checkout-button button" name="checkout" {% if cart == empty %}disabled{% endif %} form="cart">
+          {{ 'sections.cart.checkout' | t }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

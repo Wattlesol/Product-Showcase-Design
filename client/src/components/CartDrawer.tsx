@@ -14,6 +14,34 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     const { items, removeItem, updateQuantity, subtotal, totalItems } = useCart();
     const [, setLocation] = useLocation();
 
+    // Helper: sync current cart to lead record after any local change
+    const syncCart = (newItems: typeof items) => {
+        const sessionId = sessionStorage.getItem("lumina_session");
+        if (!sessionId) return;
+        const total = newItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        fetch("/api/track/lead", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, cartItems: newItems, totalPrice: total }),
+            keepalive: true,
+        }).catch(console.error);
+    };
+
+    const handleRemove = (variantId: string, size: string) => {
+        const updatedCart = items.filter(i => !(i.variantId === variantId && i.size === size));
+        removeItem(variantId, size);
+        syncCart(updatedCart);
+    };
+
+    const handleUpdateQuantity = (variantId: string, size: string, quantity: number) => {
+        if (quantity < 1) return;
+        const updatedCart = items.map(i =>
+            i.variantId === variantId && i.size === size ? { ...i, quantity } : i
+        );
+        updateQuantity(variantId, size, quantity);
+        syncCart(updatedCart);
+    };
+
     const handleCheckout = () => {
         onClose();
         setLocation("/checkout");
@@ -77,7 +105,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                                                 <div className="flex justify-between items-start">
                                                     <h3 className="font-bold text-sm leading-tight">{item.name}</h3>
                                                     <button
-                                                        onClick={() => removeItem(item.variantId, item.size)}
+                                                        onClick={() => handleRemove(item.variantId, item.size)}
                                                         className="text-gray-400 hover:text-red-500 transition-colors"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -88,14 +116,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                                             <div className="flex justify-between items-center mt-2">
                                                 <div className="flex items-center border border-gray-200 rounded-lg">
                                                     <button
-                                                        onClick={() => updateQuantity(item.variantId, item.size, item.quantity - 1)}
+                                                        onClick={() => handleUpdateQuantity(item.variantId, item.size, item.quantity - 1)}
                                                         className="p-1.5 hover:bg-gray-50 text-gray-500"
                                                     >
                                                         <Minus className="w-3 h-3" />
                                                     </button>
                                                     <span className="w-8 text-center text-xs font-bold">{item.quantity}</span>
                                                     <button
-                                                        onClick={() => updateQuantity(item.variantId, item.size, item.quantity + 1)}
+                                                        onClick={() => handleUpdateQuantity(item.variantId, item.size, item.quantity + 1)}
                                                         className="p-1.5 hover:bg-gray-50 text-gray-500"
                                                     >
                                                         <Plus className="w-3 h-3" />
