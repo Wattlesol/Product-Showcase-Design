@@ -40,31 +40,39 @@ export async function registerRoutes(
       }
 
       if (auth) {
-        const sheets = google.sheets({ version: "v4", auth });
+        try {
+          const sheets = google.sheets({ version: "v4", auth });
 
-        // Append row to Google Sheets
-        await sheets.spreadsheets.values.append({
-          spreadsheetId,
-          range: "Sheet1!A:J", // Assuming it's Sheet1
-          valueInputOption: "USER_ENTERED",
-          requestBody: {
-            values: [
-              [
-                new Date().toISOString(),
-                shipping.firstName,
-                shipping.lastName,
-                shipping.phone,
-                shipping.address,
-                shipping.city,
-                shipping.province,
-                order.map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size})`).join(",\n"),
-                totalPrice
+          // Append row to Google Sheets
+          await sheets.spreadsheets.values.append({
+            spreadsheetId,
+            range: "Sheet1!A:I", // Adjusted range to match 9 columns
+            valueInputOption: "USER_ENTERED",
+            requestBody: {
+              values: [
+                [
+                  new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" }), // Local time
+                  shipping.firstName,
+                  shipping.lastName,
+                  shipping.phone,
+                  shipping.address,
+                  shipping.city,
+                  shipping.province,
+                  order.map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size})`).join(",\n"),
+                  totalPrice
+                ],
               ],
-            ],
-          },
-        });
+            },
+          });
+          console.log("Successfully logged order to Google Sheets.");
+        } catch (sheetsError: any) {
+          console.error("Google Sheets API Error:", sheetsError.message);
+          if (sheetsError.response && sheetsError.response.data) {
+            console.error("Detailed Error Data:", JSON.stringify(sheetsError.response.data));
+          }
+        }
       } else {
-        console.warn("Google Sheets credentials not found/invalid. Skipping sheet update in dev mode.");
+        console.warn("Google Sheets credentials not found/invalid.");
       }
 
       // Decrement inventory
