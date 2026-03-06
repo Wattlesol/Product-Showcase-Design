@@ -82,22 +82,51 @@ export async function registerRoutes(
           const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
           // Attempt to load credentials for Sheets
           let auth;
-          const credsPath = path.join(process.cwd(), "server", "credentials.json");
-          console.log(`[SHEETS DEBUG] Checking for credentials at: ${credsPath}`);
-          console.log(`[SHEETS DEBUG] Current working directory: ${process.cwd()}`);
+          const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
-          if (fs.existsSync(credsPath)) {
-            console.log("[SHEETS DEBUG] Credentials file FOUND.");
+          if (serviceAccountJson) {
+            console.log("[SHEETS DEBUG] Found GOOGLE_SERVICE_ACCOUNT_JSON in environment.");
             try {
+              const credentials = JSON.parse(serviceAccountJson);
               auth = new google.auth.GoogleAuth({
-                keyFile: credsPath,
+                credentials,
                 scopes: ["https://www.googleapis.com/auth/spreadsheets"],
               });
-            } catch (authError: any) {
-              console.error("[SHEETS DEBUG] Auth Configuration Error:", authError.message);
+            } catch (parseError: any) {
+              console.error("[SHEETS DEBUG] Error parsing GOOGLE_SERVICE_ACCOUNT_JSON:", parseError.message);
             }
-          } else {
-            console.error("[SHEETS DEBUG] Credentials file NOT FOUND. Please ensure server/credentials.json exists.");
+          }
+
+          if (!auth) {
+            const possiblePaths = [
+              path.join(process.cwd(), "server", "credentials.json"),
+              path.join(process.cwd(), "credentials.json"),
+              path.join(path.dirname(process.argv[1]), "server", "credentials.json"),
+              path.join(path.dirname(process.argv[1]), "..", "server", "credentials.json"),
+              "/etc/secrets/credentials.json",
+            ];
+
+            let credsPath = "";
+            for (const p of possiblePaths) {
+              if (fs.existsSync(p)) {
+                credsPath = p;
+                break;
+              }
+            }
+
+            if (credsPath) {
+              console.log(`[SHEETS DEBUG] Found credentials.json at: ${credsPath}`);
+              try {
+                auth = new google.auth.GoogleAuth({
+                  keyFile: credsPath,
+                  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+                });
+              } catch (authError: any) {
+                console.error("[SHEETS DEBUG] Auth Configuration Error:", authError.message);
+              }
+            } else {
+              console.error("[SHEETS DEBUG] Credentials NOT FOUND (No env var or file).");
+            }
           }
 
           if (auth) {
