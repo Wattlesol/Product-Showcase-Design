@@ -10,11 +10,19 @@ export function serveStatic(app: Express) {
     );
   }
 
+  console.log(`[STATIC] Serving files from: ${distPath}`);
+
+  // Serve static files first
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  // This is required for SPA client-side routing (wouter) to work
-  app.use("*", (_req, res) => {
+  // Fall through to index.html for SPA client-side routing (wouter)
+  // This must be a GET handler to not interfere with other HTTP methods
+  app.get("*", (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    console.log(`[STATIC] SPA fallback for: ${req.path}`);
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
