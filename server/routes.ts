@@ -9,12 +9,12 @@ import nodemailer from "nodemailer";
 
 // Configure email transporter
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "mail.hostinger.com",
+  host: process.env.EMAIL_HOST || "smtp.hostinger.com",
   port: parseInt(process.env.EMAIL_PORT || "465"),
   secure: process.env.EMAIL_PORT === "465",
   auth: {
     user: process.env.EMAIL_USER || "admin@wattlesol.com",
-    pass: process.env.EMAIL_PASS || "easyPassword@786",
+    pass: process.env.EMAIL_PASS || "tepPa9symfofjixqej@",
   },
 });
 
@@ -66,74 +66,84 @@ export async function registerRoutes(
     try {
       const { order, shipping, totalPrice } = req.body;
 
-      const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
-
-      // Attempt to load credentials
-      let auth;
-      const credsPath = path.join(process.cwd(), "server", "credentials.json");
-
-      if (fs.existsSync(credsPath)) {
-        // We use a try/catch here to avoid crashing if credentials are dummy
-        try {
-          auth = new google.auth.GoogleAuth({
-            keyFile: credsPath,
-            scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-          });
-        } catch (e) {
-          console.error("Credentials error:", e);
-        }
-      }
-
-      if (auth) {
-        try {
-          const sheets = google.sheets({ version: "v4", auth });
-
-          // Append row to Google Sheets
-          await sheets.spreadsheets.values.append({
-            spreadsheetId,
-            range: "Sheet1", // Simplified range
-            valueInputOption: "USER_ENTERED",
-            requestBody: {
-              values: [
-                [
-                  new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" }), // Local time
-                  shipping.firstName,
-                  shipping.lastName,
-                  shipping.phone,
-                  shipping.address,
-                  shipping.city,
-                  shipping.province,
-                  order.map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size})`).join(",\n"),
-                  totalPrice
-                ],
-              ],
-            },
-          });
-          console.log("Successfully logged order to Google Sheets.");
-        } catch (sheetsError: any) {
-          console.error("Google Sheets API Error:", sheetsError.message);
-          if (sheetsError.response && sheetsError.response.data) {
-            console.error("Detailed Error Data:", JSON.stringify(sheetsError.response.data));
-          }
-        }
-      } else {
-        console.warn("Google Sheets credentials not found/invalid.");
-      }
-
-      // Send email fallback
-      await sendOrderEmail(order, shipping, totalPrice);
-
-      // Decrement inventory
+      // 1. Decrement inventory (Immediate/Sync-like)
       for (const item of order) {
         if (currentInventory[item.variantId] && currentInventory[item.variantId][item.size] !== undefined) {
           currentInventory[item.variantId][item.size] = Math.max(0, currentInventory[item.variantId][item.size] - item.quantity);
         }
       }
 
-      res.status(200).json({ success: true, message: "Order processed successfully" });
+      // 2. Respond to client immediately to prevent Cloudflare Timeout (524)
+      res.status(200).json({ success: true, message: "Order received. Processing in background..." });
+
+      // 3. Perform background tasks (Logging & Email) without blocking the response
+      (async () => {
+        try {
+          const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
+          // Attempt to load credentials for Sheets
+          let auth;
+          const credsPath = path.join(process.cwd(), "server", "credentials.json");
+
+          if (fs.existsSync(credsPath)) {
+            try {
+              auth = new google.auth.GoogleAuth({
+                keyFile: credsPath,
+                scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+              });
+            } catch (authError: any) {
+              console.error("Sheets Auth Configuration Error:", authError.message);
+            }
+          }
+
+          if (auth) {
+            try {
+              const sheets = google.sheets({ version: "v4", auth });
+              console.log(`Attempting to log order to Sheet: ${spreadsheetId}`);
+
+              await sheets.spreadsheets.values.append({
+                spreadsheetId,
+                range: "Sheet1",
+                valueInputOption: "USER_ENTERED",
+                requestBody: {
+                  values: [
+                    [
+                      new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" }),
+                      shipping.firstName,
+                      shipping.lastName,
+                      shipping.phone,
+                      shipping.address,
+                      shipping.city,
+                      shipping.province,
+                      order.map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size})`).join(",\n"),
+                      totalPrice
+                    ],
+                  ],
+                },
+              });
+              console.log("Successfully logged order to Google Sheets.");
+            } catch (sheetsError: any) {
+              console.error("Google Sheets API Runtime Error:", sheetsError.message);
+              if (sheetsError.response && sheetsError.response.data) {
+                console.error("Detailed API Error:", JSON.stringify(sheetsError.response.data, null, 2));
+              }
+            }
+          } else {
+            console.warn("Google Sheets update skipped: No valid credentials found.");
+          }
+
+          // Send email fallback
+          await sendOrderEmail(order, shipping, totalPrice);
+
+        } catch (bgError: any) {
+          console.error("Critical error in background checkout processing:", bgError.message);
+        }
+      })();
+
     } catch (error) {
-      console.error("Error processing checkout:", error);
-      res.status(500).json({ success: false, error: "Internal server error" });
+      console.error("Error initiating checkout:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ success: false, error: "Internal server error" });
+      }
     }
   });
 
