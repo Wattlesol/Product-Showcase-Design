@@ -41,11 +41,13 @@ export default function Checkout() {
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
-        ttq.track('InitiateCheckout', {
+        ttq.track("InitiateCheckout", {
           "contents": items.map(item => ({
             "content_id": String(item.id),
             "content_type": "product",
-            "content_name": item.name
+            "content_name": item.name,
+            "quantity": item.quantity,
+            "price": item.price
           })),
           "value": subtotal,
           "currency": "PKR"
@@ -98,11 +100,13 @@ export default function Checkout() {
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
-        ttq.track('AddPaymentInfo', {
+        ttq.track("AddPaymentInfo", {
           "contents": items.map(item => ({
             "content_id": String(item.id),
             "content_type": "product",
-            "content_name": item.name
+            "content_name": item.name,
+            "quantity": item.quantity,
+            "price": item.price
           })),
           "value": subtotal,
           "currency": "PKR"
@@ -189,16 +193,18 @@ export default function Checkout() {
           const ttqContents = items.map(item => ({
             "content_id": String(item.id),
             "content_type": "product",
-            "content_name": item.name
+            "content_name": item.name,
+            "quantity": item.quantity,
+            "price": item.price
           }));
 
-          ttq.track('Purchase', {
+          ttq.track("Purchase", {
             "contents": ttqContents,
             "value": subtotal,
             "currency": "PKR"
           });
-
-          ttq.track('PlaceAnOrder', {
+          
+          ttq.track("PlaceAnOrder", {
             "contents": ttqContents,
             "value": subtotal,
             "currency": "PKR"

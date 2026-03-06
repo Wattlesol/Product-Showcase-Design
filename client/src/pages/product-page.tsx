@@ -38,12 +38,14 @@ export default function ProductPage() {
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
-        ttq.track('ViewContent', {
+        ttq.track("ViewContent", {
           "contents": [
             {
               "content_id": String(product.id),
               "content_type": "product",
-              "content_name": product.name
+              "content_name": product.name,
+              "quantity": 1,
+              "price": product.price
             }
           ],
           "value": product.price,
@@ -73,12 +75,14 @@ export default function ProductPage() {
     // @ts-ignore
     const ttq = window.ttq;
     if (ttq) {
-      ttq.track('AddToCart', {
+      ttq.track("AddToCart", {
         "contents": [
           {
             "content_id": String(product.id),
             "content_type": "product",
-            "content_name": product.name
+            "content_name": product.name,
+            "quantity": 1,
+            "price": product.price
           }
         ],
         "value": product.price,
