@@ -82,32 +82,22 @@ export async function registerRoutes(
           const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
           // Attempt to load credentials for Sheets
           let auth;
-          const possiblePaths = [
-            path.join(process.cwd(), "server", "credentials.json"),
-            path.join(process.cwd(), "credentials.json"),
-            path.join(path.dirname(process.argv[1]), "server", "credentials.json"),
-            path.join(path.dirname(process.argv[1]), "..", "server", "credentials.json"),
-            "/etc/secrets/credentials.json",
-          ];
+          const credsPath = path.join(process.cwd(), "server", "credentials.json");
+          console.log(`[SHEETS DEBUG] Checking for credentials at: ${credsPath}`);
+          console.log(`[SHEETS DEBUG] Current working directory: ${process.cwd()}`);
 
-          let credsPath = "";
-          for (const p of possiblePaths) {
-            if (fs.existsSync(p)) {
-              credsPath = p;
-              break;
-            }
-          }
-
-          if (credsPath) {
-            console.log(`Successfully found credentials.json at: ${credsPath}`);
+          if (fs.existsSync(credsPath)) {
+            console.log("[SHEETS DEBUG] Credentials file FOUND.");
             try {
               auth = new google.auth.GoogleAuth({
                 keyFile: credsPath,
                 scopes: ["https://www.googleapis.com/auth/spreadsheets"],
               });
             } catch (authError: any) {
-              console.error("Sheets Auth Configuration Error:", authError.message);
+              console.error("[SHEETS DEBUG] Auth Configuration Error:", authError.message);
             }
+          } else {
+            console.error("[SHEETS DEBUG] Credentials file NOT FOUND. Please ensure server/credentials.json exists.");
           }
 
           if (auth) {
