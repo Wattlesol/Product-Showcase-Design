@@ -82,9 +82,24 @@ export async function registerRoutes(
           const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
           // Attempt to load credentials for Sheets
           let auth;
-          const credsPath = path.join(process.cwd(), "server", "credentials.json");
+          const possiblePaths = [
+            path.join(process.cwd(), "server", "credentials.json"),
+            path.join(process.cwd(), "credentials.json"),
+            path.join(path.dirname(process.argv[1]), "server", "credentials.json"),
+            path.join(path.dirname(process.argv[1]), "..", "server", "credentials.json"),
+            "/etc/secrets/credentials.json",
+          ];
 
-          if (fs.existsSync(credsPath)) {
+          let credsPath = "";
+          for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+              credsPath = p;
+              break;
+            }
+          }
+
+          if (credsPath) {
+            console.log(`Successfully found credentials.json at: ${credsPath}`);
             try {
               auth = new google.auth.GoogleAuth({
                 keyFile: credsPath,
