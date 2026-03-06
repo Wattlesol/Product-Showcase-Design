@@ -33,9 +33,9 @@ COPY --from=builder /app/dist ./dist
 USER lumina
 
 ENV NODE_ENV=production
-ENV PORT=3050
+ENV PORT=3000
 
-EXPOSE 3050
+EXPOSE 3000
 
 # Health check – hits the /api/health endpoint every 30s
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
