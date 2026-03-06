@@ -5,6 +5,51 @@ import { google } from "googleapis";
 import path from "path";
 import fs from "fs";
 import { currentInventory } from "./inventory";
+import nodemailer from "nodemailer";
+
+// Configure email transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || "mail.hostinger.com",
+  port: parseInt(process.env.EMAIL_PORT || "465"),
+  secure: process.env.EMAIL_PORT === "465",
+  auth: {
+    user: process.env.EMAIL_USER || "admin@wattlesol.com",
+    pass: process.env.EMAIL_PASS || "easyPassword@786",
+  },
+});
+
+async function sendOrderEmail(orderData: any, shippingData: any, total: number) {
+  const orderDetails = orderData
+    .map((item: any) => `${item.quantity}x ${item.name} (${item.color}, Size ${item.size}) - PKR ${item.price}`)
+    .join("\n");
+
+  const mailOptions = {
+    from: `"Lumina Footwear" <${process.env.EMAIL_USER}>`,
+    to: "lumilafooter@gmail.com",
+    subject: `New Order Received - ${shippingData.firstName} ${shippingData.lastName}`,
+    text: `
+New Order Details:
+------------------
+Customer: ${shippingData.firstName} ${shippingData.lastName}
+Phone: ${shippingData.phone}
+Address: ${shippingData.address}, ${shippingData.city}, ${shippingData.province}
+Apartment/Suite: ${shippingData.apartment || "N/A"}
+
+Order Items:
+${orderDetails}
+
+Total Price: PKR ${total}
+Timestamp: ${new Date().toLocaleString("en-PK", { timeZone: "Asia/Karachi" })}
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Order email sent successfully to lumilafooter@gmail.com");
+  } catch (error: any) {
+    console.error("Failed to send order email:", error.message);
+  }
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -46,7 +91,7 @@ export async function registerRoutes(
           // Append row to Google Sheets
           await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: "Sheet1!A:I", // Adjusted range to match 9 columns
+            range: "Sheet1", // Simplified range
             valueInputOption: "USER_ENTERED",
             requestBody: {
               values: [
@@ -74,6 +119,9 @@ export async function registerRoutes(
       } else {
         console.warn("Google Sheets credentials not found/invalid.");
       }
+
+      // Send email fallback
+      await sendOrderEmail(order, shipping, totalPrice);
 
       // Decrement inventory
       for (const item of order) {
