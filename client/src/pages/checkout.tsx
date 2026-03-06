@@ -35,6 +35,25 @@ export default function Checkout() {
     }
   }, [items, orderConfirmed, setLocation]);
 
+  // Track InitiateCheckout
+  useEffect(() => {
+    if (items.length > 0 && !orderConfirmed) {
+      // @ts-ignore
+      const ttq = window.ttq;
+      if (ttq) {
+        ttq.track('InitiateCheckout', {
+          "contents": items.map(item => ({
+            "content_id": String(item.id),
+            "content_type": "product",
+            "content_name": item.name
+          })),
+          "value": subtotal,
+          "currency": "PKR"
+        });
+      }
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
@@ -73,6 +92,25 @@ export default function Checkout() {
     }
 
     setIsSubmitting(true);
+
+    // TikTok Track AddPaymentInfo
+    try {
+      // @ts-ignore
+      const ttq = window.ttq;
+      if (ttq) {
+        ttq.track('AddPaymentInfo', {
+          "contents": items.map(item => ({
+            "content_id": String(item.id),
+            "content_type": "product",
+            "content_name": item.name
+          })),
+          "value": subtotal,
+          "currency": "PKR"
+        });
+      }
+    } catch (e) {
+      console.error("TikTok AddPaymentInfo Error:", e);
+    }
 
     try {
       const response = await fetch('/api/checkout', {
@@ -136,6 +174,39 @@ export default function Checkout() {
       };
 
       await trackPurchase();
+
+      // TikTok Track Purchase and PlaceAnOrder
+      try {
+        // @ts-ignore
+        const ttq = window.ttq;
+        if (ttq) {
+          const hashedPhone = await hashData(formData.phone);
+          
+          ttq.identify({
+            "phone_number": hashedPhone,
+          });
+
+          const ttqContents = items.map(item => ({
+            "content_id": String(item.id),
+            "content_type": "product",
+            "content_name": item.name
+          }));
+
+          ttq.track('Purchase', {
+            "contents": ttqContents,
+            "value": subtotal,
+            "currency": "PKR"
+          });
+
+          ttq.track('PlaceAnOrder', {
+            "contents": ttqContents,
+            "value": subtotal,
+            "currency": "PKR"
+          });
+        }
+      } catch (e) {
+        console.error("TikTok Tracking Error:", e);
+      }
 
       setIsSubmitting(false);
       setOrderConfirmed(true);

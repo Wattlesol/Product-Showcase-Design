@@ -32,10 +32,26 @@ export default function ProductPage() {
   const [viewIndex, setViewIndex] = useState(1);
   const [direction, setDirection] = useState(0);
 
-  // Reset to center view when variant changes
+  // Track product view
   useEffect(() => {
-    setViewIndex(1);
-  }, [selectedVariant]);
+    if (product) {
+      // @ts-ignore
+      const ttq = window.ttq;
+      if (ttq) {
+        ttq.track('ViewContent', {
+          "contents": [
+            {
+              "content_id": String(product.id),
+              "content_type": "product",
+              "content_name": product.name
+            }
+          ],
+          "value": product.price,
+          "currency": "PKR"
+        });
+      }
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
     addItem({
@@ -52,6 +68,23 @@ export default function ProductPage() {
       title: "Added to Cart",
       description: `${product.name} (${selectedVariant.color}, Size ${selectedSize}) has been added to your cart.`,
     });
+
+    // TikTok Track AddToCart
+    // @ts-ignore
+    const ttq = window.ttq;
+    if (ttq) {
+      ttq.track('AddToCart', {
+        "contents": [
+          {
+            "content_id": String(product.id),
+            "content_type": "product",
+            "content_name": product.name
+          }
+        ],
+        "value": product.price,
+        "currency": "PKR"
+      });
+    }
   };
 
   const slideVariants = {
