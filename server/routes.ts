@@ -58,6 +58,11 @@ export async function registerRoutes(
   // put application routes here
   // prefix all routes with /api
 
+  // Health check endpoint
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // NEW: Tracking Hit
   app.post("/api/track/hit", async (req, res) => {
     try {
