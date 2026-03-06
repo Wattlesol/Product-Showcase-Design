@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies first (layer cache)
 COPY package*.json ./
-RUN npm ci --include=dev
+RUN npm install
 
 # Copy source and build
 COPY . .
@@ -21,7 +21,7 @@ RUN addgroup -S lumina && adduser -S lumina -G lumina
 
 # Only bring in production dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy built output from builder stage
 COPY --from=builder /app/dist ./dist
