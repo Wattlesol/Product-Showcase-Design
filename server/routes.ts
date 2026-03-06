@@ -82,18 +82,26 @@ export async function registerRoutes(
           const spreadsheetId = "141X6rL6v8KIf4Dwrr-uozfZi-Ehs8uJnjHmJuAeoFSM";
           // Attempt to load credentials for Sheets
           let auth;
-          const serviceAccountJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+          const serviceAccountValue = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
-          if (serviceAccountJson) {
+          if (serviceAccountValue) {
             console.log("[SHEETS DEBUG] Found GOOGLE_SERVICE_ACCOUNT_JSON in environment.");
             try {
-              const credentials = JSON.parse(serviceAccountJson);
+              let configString = serviceAccountValue.trim();
+              
+              // If it doesn't start with '{', it's likely Base64 encoded
+              if (!configString.startsWith("{")) {
+                console.log("[SHEETS DEBUG] Attempting Base64 decoding...");
+                configString = Buffer.from(configString, "base64").toString("utf-8");
+              }
+
+              const credentials = JSON.parse(configString);
               auth = new google.auth.GoogleAuth({
                 credentials,
                 scopes: ["https://www.googleapis.com/auth/spreadsheets"],
               });
-            } catch (parseError: any) {
-              console.error("[SHEETS DEBUG] Error parsing GOOGLE_SERVICE_ACCOUNT_JSON:", parseError.message);
+            } catch (error: any) {
+              console.error("[SHEETS DEBUG] Error parsing credentials:", error.message);
             }
           }
 
