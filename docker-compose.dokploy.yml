@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  app:
+  lumina-app:
+    image: lumina-footwear:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -24,10 +25,9 @@ services:
       retries: 3
       start_period: 40s
     labels:
-      - "traefik.http.services.lumina-app.loadbalancer.server.port=3000"
-      - "traefik.http.routers.lumina-app.rule=Host(`luminafootwear.store`) || Host(`www.luminafootwear.store`)"
-      - "traefik.http.routers.lumina-app.entrypoints=websecure"
-      - "traefik.http.routers.lumina-app.tls.certresolver=letsencrypt"
+      - "traefik.enable=true"
+      - "traefik.http.routers.lumina.rule=Host(`luminafootwear.store`) || Host(`www.luminafootwear.store`)"
+      - "traefik.http.services.lumina.loadbalancer.server.port=3000"
 
 networks:
   dokploy-network:
