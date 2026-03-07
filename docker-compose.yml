@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -15,21 +17,9 @@ services:
       - EMAIL_PASS=${EMAIL_PASS}
       - GOOGLE_SERVICE_ACCOUNT_JSON=${GOOGLE_SERVICE_ACCOUNT_JSON}
     restart: unless-stopped
-    networks:
-      - dokploy-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 40s
-    labels:
-      - "traefik.http.services.lumina-app.loadbalancer.server.port=3000"
-      - "traefik.http.routers.lumina-app.rule=Host(`luminafootwear.store`) || Host(`www.luminafootwear.store`)"
-      - "traefik.http.routers.lumina-app.entrypoints=websecure"
-      - "traefik.http.routers.lumina-app.tls.certresolver=letsencrypt"
-
-networks:
-  dokploy-network:
-    external: true
-    name: dokploy-network
