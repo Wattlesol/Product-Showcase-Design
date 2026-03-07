@@ -57,8 +57,8 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - startTime;
     const statusColor = res.statusCode >= 400 ? '❌' : res.statusCode >= 300 ? '⚠️' : '✅';
-    
-    if (path.startsWith("/api")) {
+
+    if (req.path.startsWith("/api")) {
       let logLine = `${statusColor} ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         const responsePreview = JSON.stringify(capturedJsonResponse).substring(0, 200);
