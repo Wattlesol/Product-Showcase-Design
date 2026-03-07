@@ -34,9 +34,18 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+// Log all incoming HTTP requests
 app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
+  const startTime = Date.now();
+  const timestamp = new Date().toISOString();
+  
+  log(`📥 INCOMING: ${req.method} ${req.originalUrl} from ${req.ip || req.socket.remoteAddress}`, "HTTP");
+  log(`   Headers: ${JSON.stringify({
+    'user-agent': req.get('user-agent')?.substring(0, 50) || 'unknown',
+    'referer': req.get('referer') || 'direct',
+    'host': req.get('host')
+  })}`, "HTTP");
+  
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
@@ -46,17 +55,18 @@ app.use((req, res, next) => {
   };
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
+    const duration = Date.now() - startTime;
+    const statusColor = res.statusCode >= 400 ? '❌' : res.statusCode >= 300 ? '⚠️' : '✅';
+    
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      let logLine = `${statusColor} ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        const responsePreview = JSON.stringify(capturedJsonResponse).substring(0, 200);
+        logLine += ` :: ${responsePreview}`;
       }
-
-      log(logLine);
+      log(logLine, "API");
     } else {
-      // Log non-API requests too
-      log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+      log(`${statusColor} ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`, "STATIC");
     }
   });
 
@@ -64,14 +74,23 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  console.log(`\n🚀 STARTING SERVER`);
+  console.log(`================================`);
+  console.log(`📋 NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`📋 PORT: ${process.env.PORT || '3050 (default)'}`);
+  console.log(`📋 HOST: 0.0.0.0`);
+  console.log(`================================\n`);
+  
   await registerRoutes(httpServer, app);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
+    console.log(`🏭 PRODUCTION MODE: Setting up static file serving`);
     serveStatic(app);
   } else {
+    console.log(`🛠️  DEVELOPMENT MODE: Setting up Vite`);
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
@@ -81,7 +100,11 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    console.error("Internal Server Error:", err);
+    console.error(`\n❌ [ERROR] ========================================`);
+    console.error(`Status: ${status}`);
+    console.error(`Message: ${message}`);
+    console.error(`Stack:`, err.stack);
+    console.error(`========================================\n`);
 
     if (res.headersSent) {
       return next(err);
@@ -101,7 +124,12 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
     },
     () => {
+      console.log(`\n✅ SERVER READY!`);
+      console.log(`================================`);
       log(`serving on port ${port}`);
+      console.log(`🌍 Listening on: http://0.0.0.0:${port}`);
+      console.log(`🏠 Health check: http://localhost:${port}/api/health`);
+      console.log(`================================\n`);
     },
   );
 })();

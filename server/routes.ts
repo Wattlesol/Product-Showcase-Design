@@ -55,19 +55,26 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  console.log(`\n🛣️  REGISTERING API ROUTES`);
+  console.log(`================================`);
+  
   // put application routes here
   // prefix all routes with /api
 
   // Health check endpoint
   app.get("/api/health", (_req, res) => {
+    console.log(`💚 [API] GET /api/health - Health check requested`);
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+  console.log(`✅ Registered: GET /api/health`);
 
   // NEW: Tracking Hit
   app.post("/api/track/hit", async (req, res) => {
+    console.log(`📊 [API] POST /api/track/hit - Tracking page view`);
     try {
       const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       const { sessionId, path, referrer, ttclid, utmSource, utmMedium, utmCampaign } = req.body;
+      console.log(`   Session: ${sessionId}, Path: ${path}, IP: ${ipAddress}`);
       const visit = await storage.createVisit({
         sessionId,
         path,
