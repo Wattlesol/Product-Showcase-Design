@@ -33,7 +33,7 @@ export const products = [
     {
         id: 1,
         name: "Model 8080 Classic Slip-On",
-        price: 4999.00,
+        price: 3999.00,
         originalPrice: 6999.00,
         rating: 4.8,
         description: "Our flagship slip-on model, featuring premium top-grain leather and a reinforced ergonomic sole for all-day professional wear.",
@@ -45,7 +45,7 @@ export const products = [
     {
         id: 2,
         name: "Model 8079 Comfort Loafer",
-        price: 4999.00,
+        price: 3999.00,
         originalPrice: 6999.00,
         rating: 4.8,
         description: "A sophisticated loafer with extra padding and a flexible outsole, perfect for transitioning from office to evening.",
@@ -57,7 +57,7 @@ export const products = [
     {
         id: 3,
         name: "Model 8077 Executive Mocc",
-        price: 4999.00,
+        price: 3999.00,
         originalPrice: 6999.00,
         rating: 5.0,
         description: "The ultimate executive choice. Hand-stitched detailing meets a plush interior for a truly luxurious walking experience.",
@@ -69,7 +69,7 @@ export const products = [
     {
         id: 4,
         name: "Model 8076 Woven Detail",
-        price: 4999.00,
+        price: 3999.00,
         originalPrice: 6999.00,
         rating: 4.6,
         description: "Unique woven textures set this pair apart. Breathable design without sacrificing structural integrity.",
@@ -80,7 +80,7 @@ export const products = [
     {
         id: 5,
         name: "Model 8075 Modern Loafer",
-        price: 4999.00,
+        price: 3999.00,
         originalPrice: 6999.00,
         rating: 4.8,
         description: "A contemporary take on the traditional loafer, featuring a streamlined silhouette and lightweight materials.",
