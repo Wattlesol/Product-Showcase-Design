@@ -122,8 +122,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead> {
+    // Don't update lastUpdated timestamp to preserve order position in list
     const [updated] = await db.update(leads)
-      .set({ ...data, lastUpdated: new Date().toISOString() })
+      .set(data)
       .where(eq(leads.sessionId, sessionId))
       .returning();
     return updated;

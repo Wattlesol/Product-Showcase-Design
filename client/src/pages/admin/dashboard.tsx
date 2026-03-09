@@ -84,7 +84,7 @@ export default function AdminDashboard() {
   // Comments state
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
-  const [newComment, setNewComment] = useState("");
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   
   // Products for edit modal
   const [products, setProducts] = useState<Product[]>([]);
@@ -274,8 +274,10 @@ export default function AdminDashboard() {
   // Add comment to order
   const addComment = async (sessionId: string) => {
     const token = localStorage.getItem("admin_token");
-    if (!token || !newComment.trim()) return;
+    const commentText = commentInputs[sessionId] || "";
     
+    if (!token || !commentText.trim()) return;
+
     try {
       const resp = await fetch(`/api/admin/orders/${sessionId}/comment`, {
         method: "POST",
@@ -283,19 +285,24 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
           Authorization: token,
         },
-        body: JSON.stringify({ comment: newComment, author: "admin" }),
+        body: JSON.stringify({ comment: commentText.trim(), author: "admin" }),
       });
-      
+
       if (resp.ok) {
         const addedComment = await resp.json();
         setComments(prev => ({
           ...prev,
           [sessionId]: [addedComment, ...(prev[sessionId] || [])]
         }));
-        setNewComment("");
+        setCommentInputs(prev => ({ ...prev, [sessionId]: "" }));
+      } else {
+        const error = await resp.json();
+        console.error("Failed to add comment:", error);
+        alert("Failed to add comment. Please try again.");
       }
     } catch (e) {
       console.error("Failed to add comment:", e);
+      alert("Failed to add comment. Please try again.");
     }
   };
   
@@ -873,35 +880,56 @@ export default function AdminDashboard() {
                                     <MessageSquare className="w-4 h-4 text-gray-400" />
                                     <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Order Comments</span>
                                   </div>
-                                  
-                                  {/* Existing Comments */}
-                                  <div className="space-y-2 max-h-48 overflow-y-auto">
+
+                                  {/* Existing Comments - Read Only Timeline */}
+                                  <div className="space-y-3 max-h-48 overflow-y-auto">
                                     {(comments[lead.sessionId] || []).length > 0 ? (
                                       comments[lead.sessionId].map((comment: Comment) => (
-                                        <div key={comment.id} className="bg-white rounded-lg border border-gray-200 p-2">
-                                          <div className="flex items-center justify-between mb-1">
-                                            <span className="text-[10px] font-bold uppercase text-gray-500">{comment.author}</span>
-                                            <span className="text-[9px] text-gray-400">{new Date(comment.createdAt).toLocaleString()}</span>
+                                        <div key={comment.id} className="flex gap-3">
+                                          {/* Timeline Date/Time - Left Side */}
+                                          <div className="flex-shrink-0 w-32 pt-2">
+                                            <div className="text-[9px] font-bold uppercase text-gray-400 tracking-wider">
+                                              {format(new Date(comment.createdAt), "MMM d, yyyy")}
+                                            </div>
+                                            <div className="text-[9px] text-gray-300 font-mono">
+                                              {format(new Date(comment.createdAt), "h:mm a")}
+                                            </div>
                                           </div>
-                                          <p className="text-sm text-gray-700">{comment.comment}</p>
+                                          
+                                          {/* Timeline Line */}
+                                          <div className="flex-shrink-0 w-px bg-gray-200 h-full mt-1"></div>
+                                          
+                                          {/* Comment Card */}
+                                          <div className="flex-1 bg-white rounded-lg border border-gray-200 p-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                              <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center">
+                                                <MessageSquare className="w-3 h-3 text-white" />
+                                              </div>
+                                              <span className="text-[10px] font-bold uppercase text-gray-600">{comment.author}</span>
+                                            </div>
+                                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.comment}</p>
+                                          </div>
                                         </div>
                                       ))
                                     ) : (
-                                      <p className="text-sm text-gray-400 italic">No comments yet. Add the first comment below.</p>
+                                      <div className="text-center py-8">
+                                        <MessageSquare className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                                        <p className="text-sm text-gray-400 italic">No comments yet. Add the first comment below.</p>
+                                      </div>
                                     )}
                                   </div>
-                                  
+
                                   {/* Add Comment */}
                                   <div className="flex gap-2">
                                     <Textarea
-                                      value={newComment}
-                                      onChange={(e) => setNewComment(e.target.value)}
+                                      value={commentInputs[lead.sessionId] || ""}
+                                      onChange={(e) => setCommentInputs(prev => ({ ...prev, [lead.sessionId]: e.target.value }))}
                                       placeholder="Add a note about this order..."
                                       className="min-h-[60px] text-sm"
                                     />
                                     <Button
                                       onClick={() => addComment(lead.sessionId)}
-                                      disabled={!newComment.trim()}
+                                      disabled={!(commentInputs[lead.sessionId] || "").trim()}
                                       className="bg-black text-white hover:bg-gray-800 rounded-lg px-4"
                                     >
                                       <Plus className="w-4 h-4" />
