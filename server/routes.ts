@@ -477,5 +477,79 @@ export async function registerRoutes(
     }
   });
 
+  // ─── ORDER MANAGEMENT ROUTES ───────────────────────────────────────────────
+  
+  // Add comment to order
+  app.post("/api/admin/orders/:sessionId/comment", async (req, res) => {
+    const token = req.headers.authorization;
+    if (token !== "simple-admin-token") return res.status(401).json({ error: "Unauthorized" });
+    
+    try {
+      const { sessionId } = req.params;
+      const { comment, author } = req.body;
+      
+      if (!comment || comment.trim() === "") {
+        return res.status(400).json({ error: "Comment is required" });
+      }
+      
+      const newComment = await storage.addOrderComment({
+        sessionId,
+        comment: comment.trim(),
+        author: author || "admin",
+      });
+      
+      res.json(newComment);
+    } catch (error: any) {
+      console.error("Failed to add comment:", error);
+      res.status(500).json({ error: "Failed to add comment" });
+    }
+  });
+  
+  // Get comments for order
+  app.get("/api/admin/orders/:sessionId/comments", async (req, res) => {
+    const token = req.headers.authorization;
+    if (token !== "simple-admin-token") return res.status(401).json({ error: "Unauthorized" });
+    
+    try {
+      const { sessionId } = req.params;
+      const comments = await storage.getOrderComments(sessionId);
+      res.json(comments);
+    } catch (error: any) {
+      console.error("Failed to get comments:", error);
+      res.status(500).json({ error: "Failed to get comments" });
+    }
+  });
+  
+  // Update order details
+  app.put("/api/admin/orders/:sessionId", async (req, res) => {
+    const token = req.headers.authorization;
+    if (token !== "simple-admin-token") return res.status(401).json({ error: "Unauthorized" });
+    
+    try {
+      const { sessionId } = req.params;
+      const updateData = req.body;
+      
+      // Validate and sanitize update data
+      const allowedFields = ["firstName", "lastName", "phone", "address", "city", "province", "cartItems", "totalPrice", "status"];
+      const sanitizedData: any = {};
+      
+      for (const field of allowedFields) {
+        if (updateData[field] !== undefined) {
+          sanitizedData[field] = updateData[field];
+        }
+      }
+      
+      if (Object.keys(sanitizedData).length === 0) {
+        return res.status(400).json({ error: "No valid fields to update" });
+      }
+      
+      const updatedOrder = await storage.updateOrder(sessionId, sanitizedData);
+      res.json(updatedOrder);
+    } catch (error: any) {
+      console.error("Failed to update order:", error);
+      res.status(500).json({ error: "Failed to update order" });
+    }
+  });
+
   return httpServer;
 }

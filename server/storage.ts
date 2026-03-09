@@ -1,6 +1,6 @@
-import { type User, type InsertUser, type Visit, type InsertVisit, type Lead, type InsertLead, type Event, type InsertEvent, type Product, type InsertProduct, users, visits, leads, events, products } from "@shared/schema";
+import { type User, type InsertUser, type Visit, type InsertVisit, type Lead, type InsertLead, type Event, type InsertEvent, type Product, type InsertProduct, type OrderComment, type InsertOrderComment, users, visits, leads, events, products, orderComments } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -25,6 +25,11 @@ export interface IStorage {
   // Products
   getProducts(): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+
+  // Order Comments
+  addOrderComment(comment: InsertOrderComment): Promise<OrderComment>;
+  getOrderComments(sessionId: string): Promise<OrderComment[]>;
+  updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -104,6 +109,24 @@ export class DatabaseStorage implements IStorage {
       set: insertProduct
     }).returning();
     return productItem;
+  }
+
+  // Order Comments
+  async addOrderComment(comment: InsertOrderComment): Promise<OrderComment> {
+    const [newComment] = await db.insert(orderComments).values(comment).returning();
+    return newComment;
+  }
+
+  async getOrderComments(sessionId: string): Promise<OrderComment[]> {
+    return await db.select().from(orderComments).where(eq(orderComments.sessionId)).orderBy(desc(orderComments.createdAt));
+  }
+
+  async updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead> {
+    const [updated] = await db.update(leads)
+      .set({ ...data, lastUpdated: new Date().toISOString() })
+      .where(eq(leads.sessionId, sessionId))
+      .returning();
+    return updated;
   }
 }
 

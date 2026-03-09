@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -59,6 +59,14 @@ export const events = pgTable("events", {
   metadata: text("metadata"), // JSON string
 });
 
+export const orderComments = pgTable("order_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: text("session_id").notNull(),
+  comment: text("comment").notNull(),
+  author: text("author").default("admin"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -68,6 +76,7 @@ export const insertVisitSchema = createInsertSchema(visits);
 export const insertLeadSchema = createInsertSchema(leads);
 export const insertEventSchema = createInsertSchema(events);
 export const insertProductSchema = createInsertSchema(products);
+export const insertOrderCommentSchema = createInsertSchema(orderComments);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -79,3 +88,5 @@ export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type OrderComment = typeof orderComments.$inferSelect;
+export type InsertOrderComment = z.infer<typeof insertOrderCommentSchema>;
