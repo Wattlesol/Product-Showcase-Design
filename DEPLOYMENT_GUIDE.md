@@ -45,7 +45,7 @@ git push
 ```env
 NODE_ENV=production
 PORT=3000
-DATABASE_URL=postgresql://lumina:cePqib-rupgus-kiwxu7@142.44.136.233:5435/lumina
+DATABASE_URL=postgresql://jarvis:dirpe9-nabwaz-muproJ@142.44.136.233:5433/footwear
 EMAIL_HOST=smtp.hostinger.com
 EMAIL_PORT=465
 EMAIL_USER=admin@wattlesol.com
