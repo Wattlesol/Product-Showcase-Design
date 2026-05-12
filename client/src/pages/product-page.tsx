@@ -75,44 +75,20 @@ export default function ProductPage() {
     };
 
     addItem(newItem);
-
-    // Compute what the cart will look like after this add
-    const existingIndex = items.findIndex(
-      i => i.variantId === newItem.variantId && i.size === newItem.size
-    );
-    const updatedCart = existingIndex > -1
-      ? items.map((i, idx) => idx === existingIndex ? { ...i, quantity: i.quantity + 1 } : i)
-      : [...items, { ...newItem, quantity: 1 }];
-
-    // Sync current cart to lead record so dashboard always shows real cart
-    const sessionId = sessionStorage.getItem("lumina_session");
-    if (sessionId) {
-      const subtotal = updatedCart.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      fetch("/api/track/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          cartItems: updatedCart,
-          totalPrice: subtotal,
-        }),
-        keepalive: true,
-      }).catch(console.error);
-    }
-
+    
     trackEvent("add_to_cart", {
       productId: String(product.id),
       productName: product.name,
       metadata: {
         variantId: selectedVariant.id,
-        size: selectedSize,
+        size: selectedSize || "One Size",
         price: product.price
       }
     });
 
     toast({
       title: "Added to Cart",
-      description: `${product.name} (${selectedVariant.color}, Size ${selectedSize}) has been added to your cart.`,
+      description: `${product.name} ${product.category === 'Shoes' ? `(${selectedVariant.color}, Size ${selectedSize})` : ''} has been added to your cart.`,
     });
 
     // TikTok Track AddToCart
@@ -263,59 +239,63 @@ export default function ProductPage() {
             </div>
 
             <div className="space-y-6 mb-10">
-              <div className="mb-6">
-                <label className="block text-sm font-bold uppercase tracking-wider mb-4">Color: <span className="text-gray-500 font-normal">{selectedVariant.color}</span></label>
-                <div className="flex gap-3">
-                  {product.variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setSelectedVariant(variant)}
-                      className={`w-12 h-12 rounded-full border-2 p-1 transition-all ${selectedVariant.id === variant.id
-                        ? 'border-black'
-                        : 'border-transparent hover:border-gray-300'
-                        }`}
-                      title={variant.color}
-                    >
-                      <span
-                        className="block w-full h-full rounded-full border border-gray-200 shadow-sm"
-                        style={{ backgroundColor: variant.colorCode }}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {product.category === "Shoes" && (
+                <>
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold uppercase tracking-wider mb-4">Color: <span className="text-gray-500 font-normal">{selectedVariant.color}</span></label>
+                    <div className="flex gap-3">
+                      {product.variants.map((variant) => (
+                        <button
+                          key={variant.id}
+                          onClick={() => setSelectedVariant(variant)}
+                          className={`w-12 h-12 rounded-full border-2 p-1 transition-all ${selectedVariant.id === variant.id
+                            ? 'border-black'
+                            : 'border-transparent hover:border-gray-300'
+                            }`}
+                          title={variant.color}
+                        >
+                          <span
+                            className="block w-full h-full rounded-full border border-gray-200 shadow-sm"
+                            style={{ backgroundColor: variant.colorCode }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wider mb-4">Select Size</label>
-                <div className="grid grid-cols-4 gap-3">
-                  {["6", "7", "8", "9", "10", "11"].map((size) => {
-                    const isOutOfStock = inventoryData && inventoryData[selectedVariant.id] && inventoryData[selectedVariant.id][size] <= 0;
-                    return (
-                      <button
-                        key={size}
-                        disabled={isOutOfStock}
-                        onClick={() => setSelectedSize(size)}
-                        className={`h-12 border rounded-xl font-medium transition-all 
-                          ${selectedSize === size ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-black'}
-                          ${isOutOfStock ? 'opacity-30 cursor-not-allowed line-through hover:border-gray-200' : ''}
-                        `}
-                      >
-                        {size}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                  <div>
+                    <label className="block text-sm font-bold uppercase tracking-wider mb-4">Select Size</label>
+                    <div className="grid grid-cols-4 gap-3">
+                      {["6", "7", "8", "9", "10", "11"].map((size) => {
+                        const isOutOfStock = inventoryData && inventoryData[selectedVariant.id] && inventoryData[selectedVariant.id][size] <= 0;
+                        return (
+                          <button
+                            key={size}
+                            disabled={isOutOfStock}
+                            onClick={() => setSelectedSize(size)}
+                            className={`h-12 border rounded-xl font-medium transition-all 
+                              ${selectedSize === size ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-black'}
+                              ${isOutOfStock ? 'opacity-30 cursor-not-allowed line-through hover:border-gray-200' : ''}
+                            `}
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="pt-4 flex gap-4">
                 <Button
                   size="lg"
                   className="flex-1 h-16 rounded-2xl text-lg font-bold shadow-xl shadow-black/10 cursor-pointer flex items-center justify-center gap-2"
-                  disabled={!selectedSize}
+                  disabled={product.category === "Shoes" && !selectedSize}
                   onClick={handleAddToCart}
                 >
                   <ShoppingBag className="w-5 h-5" />
-                  {selectedSize ? 'Add to Cart' : 'Select a Size'}
+                  {product.category === "Shoes" ? (selectedSize ? 'Add to Cart' : 'Select a Size') : 'Add to Cart'}
                 </Button>
 
                 {items.length > 0 && (

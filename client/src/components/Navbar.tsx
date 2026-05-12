@@ -29,7 +29,14 @@ const Navbar: React.FC = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
-                        <button onClick={() => setLocation("/")} className="hover:text-black transition-colors">Collection</button>
+                        <button onClick={() => {
+                            setLocation("/");
+                            setTimeout(() => document.getElementById('shoes-collection')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                        }} className="hover:text-black transition-colors">Shoes</button>
+                        <button onClick={() => {
+                            setLocation("/");
+                            setTimeout(() => document.getElementById('bags-collection')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                        }} className="hover:text-black transition-colors">Bags</button>
                         <button onClick={() => setLocation("/blog")} className="hover:text-black transition-colors">Blog</button>
                     </div>
 
