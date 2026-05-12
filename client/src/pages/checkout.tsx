@@ -94,6 +94,20 @@ export default function Checkout() {
     if (formErrors[id]) {
       setFormErrors(prev => ({ ...prev, [id]: '' }));
     }
+
+    // Meta Pixel Track Lead (only once per session when they start filling the form)
+    if (!sessionStorage.getItem("meta_lead_tracked")) {
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'Lead', {
+          content_name: 'Checkout Form Start',
+          value: subtotal,
+          currency: 'PKR'
+        });
+        sessionStorage.setItem("meta_lead_tracked", "true");
+      }
+    }
   };
 
   const validateForm = () => {
