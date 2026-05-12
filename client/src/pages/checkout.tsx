@@ -38,6 +38,7 @@ export default function Checkout() {
   // Track InitiateCheckout
   useEffect(() => {
     if (items.length > 0 && !orderConfirmed) {
+      // TikTok Track InitiateCheckout
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
@@ -51,6 +52,18 @@ export default function Checkout() {
           })),
           "value": subtotal,
           "currency": "PKR"
+        });
+      }
+
+      // Meta Pixel Track InitiateCheckout
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'InitiateCheckout', {
+          content_ids: items.map(item => String(item.id)),
+          content_type: 'product',
+          value: subtotal,
+          currency: 'PKR'
         });
       }
     }
@@ -132,6 +145,22 @@ export default function Checkout() {
       }
     } catch (e) {
       console.error("TikTok AddPaymentInfo Error:", e);
+    }
+
+    // Meta Pixel Track AddPaymentInfo
+    try {
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'AddPaymentInfo', {
+          content_ids: items.map(item => String(item.id)),
+          content_type: 'product',
+          value: subtotal,
+          currency: 'PKR'
+        });
+      }
+    } catch (e) {
+      console.error("Meta AddPaymentInfo Error:", e);
     }
 
     try {
@@ -235,6 +264,22 @@ export default function Checkout() {
         console.error("TikTok Tracking Error:", e);
       }
 
+      // Meta Pixel Track Purchase
+      try {
+        // @ts-ignore
+        if (window.fbq) {
+          // @ts-ignore
+          window.fbq('track', 'Purchase', {
+            content_ids: items.map(item => String(item.id)),
+            content_type: 'product',
+            value: subtotal,
+            currency: 'PKR'
+          });
+        }
+      } catch (e) {
+        console.error("Meta Purchase Tracking Error:", e);
+      }
+      
       setIsSubmitting(false);
       setOrderConfirmed(true);
       clearCart(); // Clear the cart after successful order

@@ -33,6 +33,13 @@ export function useTracker(options: { skipHit?: boolean } = {}) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(hitData),
         });
+        
+        // Meta Pixel Track PageView
+        // @ts-ignore
+        if (window.fbq) {
+          // @ts-ignore
+          window.fbq('track', 'PageView');
+        }
       } catch (e) {
         console.error("Tracking failed", e);
       }

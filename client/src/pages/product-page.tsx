@@ -42,6 +42,7 @@ export default function ProductPage() {
         productName: product.name,
         metadata: { price: product.price }
       });
+      // TikTok Track ViewContent
       // @ts-ignore
       const ttq = window.ttq;
       if (ttq) {
@@ -57,6 +58,19 @@ export default function ProductPage() {
           ],
           "value": product.price,
           "currency": "PKR"
+        });
+      }
+
+      // Meta Pixel Track ViewContent
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'ViewContent', {
+          content_ids: [String(product.id)],
+          content_type: 'product',
+          content_name: product.name,
+          value: product.price,
+          currency: 'PKR'
         });
       }
     }
@@ -107,6 +121,19 @@ export default function ProductPage() {
         ],
         "value": product.price,
         "currency": "PKR"
+      });
+    }
+
+    // Meta Pixel Track AddToCart
+    // @ts-ignore
+    if (window.fbq) {
+      // @ts-ignore
+      window.fbq('track', 'AddToCart', {
+        content_ids: [String(product.id)],
+        content_type: 'product',
+        content_name: product.name,
+        value: product.price,
+        currency: 'PKR'
       });
     }
   };
