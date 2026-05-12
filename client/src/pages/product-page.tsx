@@ -66,7 +66,13 @@ export default function ProductPage() {
       if (window.fbq) {
         // @ts-ignore
         window.fbq('track', 'ViewContent', {
-          content_ids: [String(product.id)],
+          contents: [
+            {
+              id: String(product.id),
+              quantity: 1,
+              item_price: product.price
+            }
+          ],
           content_type: 'product',
           content_name: product.name,
           value: product.price,
@@ -129,7 +135,13 @@ export default function ProductPage() {
     if (window.fbq) {
       // @ts-ignore
       window.fbq('track', 'AddToCart', {
-        content_ids: [String(product.id)],
+        contents: [
+          {
+            id: String(product.id),
+            quantity: 1,
+            item_price: product.price
+          }
+        ],
         content_type: 'product',
         content_name: product.name,
         value: product.price,

@@ -60,7 +60,11 @@ export default function Checkout() {
       if (window.fbq) {
         // @ts-ignore
         window.fbq('track', 'InitiateCheckout', {
-          content_ids: items.map(item => String(item.id)),
+          contents: items.map(item => ({
+            id: String(item.id),
+            quantity: item.quantity,
+            item_price: item.price
+          })),
           content_type: 'product',
           value: subtotal,
           currency: 'PKR'
@@ -73,6 +77,20 @@ export default function Checkout() {
     const { id, value } = e.target;
     const newFormData = { ...formData, [id]: value };
     setFormData(newFormData);
+
+    // Meta Pixel Advanced Matching (Set user data as they type)
+    // @ts-ignore
+    if (window.fbq) {
+      // @ts-ignore
+      window.fbq('set', 'user_data', {
+        ph: newFormData.phone.replace(/\D/g, ''),
+        fn: newFormData.firstName.toLowerCase().trim(),
+        ln: newFormData.lastName.toLowerCase().trim(),
+        ct: newFormData.city.toLowerCase().trim(),
+        st: newFormData.province.toLowerCase().trim(),
+        country: 'pk'
+      });
+    }
 
     // Track Lead on change with keepalive for reliability
     const sessionId = sessionStorage.getItem("lumina_session");
@@ -167,7 +185,11 @@ export default function Checkout() {
       if (window.fbq) {
         // @ts-ignore
         window.fbq('track', 'AddPaymentInfo', {
-          content_ids: items.map(item => String(item.id)),
+          contents: items.map(item => ({
+            id: String(item.id),
+            quantity: item.quantity,
+            item_price: item.price
+          })),
           content_type: 'product',
           value: subtotal,
           currency: 'PKR'
@@ -284,7 +306,11 @@ export default function Checkout() {
         if (window.fbq) {
           // @ts-ignore
           window.fbq('track', 'Purchase', {
-            content_ids: items.map(item => String(item.id)),
+            contents: items.map(item => ({
+              id: String(item.id),
+              quantity: item.quantity,
+              item_price: item.price
+            })),
             content_type: 'product',
             value: subtotal,
             currency: 'PKR'
