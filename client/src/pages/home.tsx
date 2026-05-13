@@ -3,7 +3,7 @@ import { Star, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState, useCallback, useEffect } from "react";
-import { products } from "@/lib/data";
+import { useProducts } from "@/hooks/use-products";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -34,7 +34,7 @@ const heroSlides = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [introFinished, setIntroFinished] = useState(false);
+  const { data: products, isLoading } = useProducts();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 5000 })]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -64,6 +64,14 @@ export default function Home() {
     mouseX.set(x);
     mouseY.set(y);
   };
+
+  if (isLoading || !products) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const shoes = products.filter(p => p.category === "Shoes");
   const bags = products.filter(p => p.category === "Bags");

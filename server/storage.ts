@@ -1,6 +1,17 @@
-import { type User, type InsertUser, type Visit, type InsertVisit, type Lead, type InsertLead, type Event, type InsertEvent, type Product, type InsertProduct, type OrderComment, type InsertOrderComment, users, visits, leads, events, products, orderComments } from "@shared/schema";
+import { 
+  type User, type InsertUser, 
+  type Visit, type InsertVisit, 
+  type Lead, type InsertLead, 
+  type Event, type InsertEvent, 
+  type Product, type InsertProduct, 
+  type ProductImage, 
+  type Order, type InsertOrder,
+  type OrderComment, type InsertOrderComment, 
+  users, visits, leads, events, products, productImages, orders, orderComments 
+} from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
+import { hashPassword } from "./auth";
 
 export interface IStorage {
   // Users
@@ -24,12 +35,24 @@ export interface IStorage {
 
   // Products
   getProducts(): Promise<Product[]>;
+  getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  
+  // Product Images
+  saveProductImage(image: Omit<ProductImage, "id">): Promise<ProductImage>;
+  getProductImage(productId: number, variantId: string, type: string): Promise<ProductImage | undefined>;
+
+  // Orders
+  createOrder(order: InsertOrder): Promise<Order>;
+  getOrders(): Promise<Order[]>;
 
   // Order Comments
   addOrderComment(comment: InsertOrderComment): Promise<OrderComment>;
   getOrderComments(sessionId: string): Promise<OrderComment[]>;
   updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead>;
+
+  // Cleanup
+  clearTrackingData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -44,11 +67,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const hashedPassword = await hashPassword(insertUser.password);
+    const [user] = await db.insert(users).values({ ...insertUser, password: hashedPassword }).returning();
     return user;
   }
 
-  async createVisit(insertVisit: InsertVisit): Promise<Visit> {
+  async createVisit(insertVisit: any): Promise<Visit> {
     const [visit] = await db.insert(visits).values(insertVisit).returning();
     return visit;
   }
@@ -57,12 +81,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(visits);
   }
 
-  async updateLead(insertLead: InsertLead): Promise<Lead> {
+  async updateLead(insertLead: any): Promise<Lead> {
     const existing = await this.getLeadBySession(insertLead.sessionId);
     if (existing) {
-      // If the lead is already marked as ordered, don't let a partial form sync downgrade it
       const finalStatus = existing.status === "ordered" ? "ordered" : (insertLead.status || "pending");
-
       const [updated] = await db.update(leads)
         .set({ ...insertLead, status: finalStatus })
         .where(eq(leads.sessionId, insertLead.sessionId))
@@ -89,7 +111,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(leads.sessionId, sessionId));
   }
 
-  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+  async createEvent(insertEvent: any): Promise<Event> {
     const [event] = await db.insert(events).values(insertEvent).returning();
     return event;
   }
@@ -100,15 +122,46 @@ export class DatabaseStorage implements IStorage {
 
   // Products
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
+    return await db.select().from(products).where(eq(products.active, true));
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product;
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const [productItem] = await db.insert(products).values(insertProduct).onConflictDoUpdate({
-      target: products.id,
-      set: insertProduct
-    }).returning();
+    const [productItem] = await db.insert(products).values(insertProduct).returning();
     return productItem;
+  }
+
+  // Product Images
+  async saveProductImage(image: Omit<ProductImage, "id">): Promise<ProductImage> {
+    const [saved] = await db.insert(productImages).values(image).returning();
+    return saved;
+  }
+
+  async getProductImage(productId: number, variantId: string, type: string): Promise<ProductImage | undefined> {
+    const [image] = await db.select()
+      .from(productImages)
+      .where(
+        and(
+          eq(productImages.productId, productId),
+          eq(productImages.variantId, variantId),
+          eq(productImages.imageType, type)
+        )
+      );
+    return image;
+  }
+
+  // Orders
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.timestamp));
   }
 
   // Order Comments
@@ -118,16 +171,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrderComments(sessionId: string): Promise<OrderComment[]> {
-    return await db.select().from(orderComments).where(eq(orderComments.sessionId)).orderBy(desc(orderComments.createdAt));
+    return await db.select().from(orderComments).where(eq(orderComments.sessionId, sessionId)).orderBy(desc(orderComments.createdAt));
   }
 
   async updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead> {
-    // Don't update lastUpdated timestamp to preserve order position in list
     const [updated] = await db.update(leads)
       .set(data)
       .where(eq(leads.sessionId, sessionId))
       .returning();
     return updated;
+  }
+
+  // Cleanup
+  async clearTrackingData(): Promise<void> {
+    await db.delete(visits);
+    await db.delete(leads);
+    await db.delete(events);
   }
 }
 

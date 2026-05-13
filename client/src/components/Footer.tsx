@@ -19,7 +19,9 @@ export default function Footer() {
                                 <Facebook className="w-5 h-5" />
                             </a>
                             <a href="https://www.tiktok.com/@lumina.shoes?_r=1&_t=ZS-96JZPHAH79E" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors" title="TikTok">
-                                <Music className="w-5 h-5" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.13-1.47-.13 1.95-.12 3.9-.12 5.85 0 2.21-.75 4.41-2.23 6.04-1.49 1.63-3.7 2.63-5.88 2.63-2.18 0-4.39-1-5.88-2.63-1.48-1.63-2.23-3.83-2.23-6.04 0-2.21.75-4.41 2.23-6.04 1.49-1.63 3.7-2.63 5.88-2.63.14 0 .28 0 .42.01v4.07c-.14-.01-.28-.01-.42-.01-1.39 0-2.79.64-3.73 1.67-.94 1.03-1.42 2.44-1.42 3.84 0 1.4.48 2.81 1.42 3.84.94 1.03 2.34 1.67 3.73 1.67 1.39 0 2.79-.64 3.73-1.67.94-1.03 1.42-2.44 1.42-3.84 0-3.67-.01-7.34-.01-11.01 0-.17.02-.34.03-.51.01-.17.03-.34.03-.51z"/>
+                                </svg>
                             </a>
                         </div>
                     </div>

@@ -4,11 +4,10 @@ import { Star, ShieldCheck, Truck, RefreshCw, ChevronLeft, ChevronRight, Shoppin
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { products } from "@/lib/data";
 import { useCart } from "@/lib/cart-context";
 import { useTracker } from "@/hooks/use-tracker";
-
 import { useQuery } from "@tanstack/react-query";
+import { useProduct } from "@/hooks/use-products";
 
 export default function ProductPage() {
   const [, params] = useRoute("/product/:id");
@@ -18,6 +17,8 @@ export default function ProductPage() {
   const { trackEvent } = useTracker({ skipHit: true });
   const [selectedSize, setSelectedSize] = useState("");
 
+  const productId = Number(params?.id);
+  const { data: product, isLoading } = useProduct(productId);
   const { data: inventoryData } = useQuery<Record<string, Record<string, number>>>({
     queryKey: ['inventory'],
     queryFn: async () => {
@@ -27,8 +28,21 @@ export default function ProductPage() {
     }
   });
 
-  const product = products.find(p => p.id === Number(params?.id)) || products[0];
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+
+  useEffect(() => {
+    if (product && !selectedVariant) {
+      setSelectedVariant(product.variants[0]);
+    }
+  }, [product, selectedVariant]);
+
+  if (isLoading || !product || !selectedVariant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   // 0 = Left, 1 = Center, 2 = Right
   const [viewIndex, setViewIndex] = useState(1);
