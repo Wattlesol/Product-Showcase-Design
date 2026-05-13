@@ -416,8 +416,8 @@ export default function AdminDashboard() {
   // Quick date filter presets
   const applyDatePreset = (preset: string) => {
     const now = new Date();
-    let from = new Date();
-    let to = now;
+    let from: Date | null = new Date();
+    let to: Date | null = now;
     
     switch (preset) {
       case "today":
@@ -632,7 +632,7 @@ export default function AdminDashboard() {
                                     <div>
                                       <div className="font-bold text-[10px] leading-tight">{item.name}</div>
                                       <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="font-mono text-[9px] bg-black text-white px-1 py-0.5 rounded">{item.variantId?.toUpperCase()}</span>
+                                        <span className="font-mono text-[9px] bg-black text-white px-1 py-0.5 rounded">{String(item.variantId || "").toUpperCase()}</span>
                                         <span className="text-[9px] bg-blue-50 text-blue-600 border border-blue-100 px-1 py-0.5 rounded font-bold">SZ {item.size}</span>
                                         <span className="text-[9px] text-gray-400 font-bold">×{item.quantity}</span>
                                       </div>
@@ -733,7 +733,7 @@ export default function AdminDashboard() {
                                     <div>
                                       <div className="font-bold text-[11px] leading-tight">{item.name}</div>
                                       <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="font-mono text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold">{item.variantId?.toUpperCase()}</span>
+                                        <span className="font-mono text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold">{String(item.variantId || "").toUpperCase()}</span>
                                         <span className="text-[9px] bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded font-bold">SZ {item.size}</span>
                                         <span className="text-[9px] bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded font-bold">{item.color}</span>
                                         <span className="text-[9px] text-gray-400 font-bold">×{item.quantity}</span>
@@ -821,7 +821,7 @@ export default function AdminDashboard() {
                                       <div>
                                         <div className="font-bold text-[11px] leading-tight">{item.name}</div>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                          <span className="font-mono text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold">{item.variantId?.toUpperCase()}</span>
+                                          <span className="font-mono text-[9px] bg-black text-white px-1.5 py-0.5 rounded font-bold">{String(item.variantId || "").toUpperCase()}</span>
                                           <span className="text-[9px] bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded font-bold">SZ {item.size}</span>
                                           <span className="text-[9px] bg-amber-50 text-amber-600 border border-amber-100 px-1.5 py-0.5 rounded font-bold">{item.color}</span>
                                           <span className="text-[9px] text-gray-400 font-bold">×{item.quantity}</span>
