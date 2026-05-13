@@ -1,8 +1,7 @@
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Star, ShieldCheck, Truck, RefreshCw, ChevronLeft, ChevronRight, ShoppingBag, ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/lib/cart-context";
 import { useTracker } from "@/hooks/use-tracker";
@@ -31,7 +30,6 @@ export default function ProductPage() {
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [viewIndex, setViewIndex] = useState(1);
-  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
     if (product && !selectedVariant) {
@@ -90,7 +88,8 @@ export default function ProductPage() {
   if (isLoading || !product || !selectedVariant) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-black/20 border-t-black rounded-full" style={{ animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
@@ -163,38 +162,15 @@ export default function ProductPage() {
     }
   };
 
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-      rotateY: direction > 0 ? 45 : -45,
-    }),
-    center: {
-      z: 1,
-      x: 0,
-      opacity: 1,
-      rotateY: 0,
-    },
-    exit: (direction: number) => ({
-      z: 0,
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-      rotateY: direction < 0 ? 45 : -45,
-    })
-  };
-
-  const swipeConfidenceThreshold = 10000;
-  const swipePower = (offset: number, velocity: number) => {
-    return Math.abs(offset) * velocity;
-  };
-
   const changeView = (newDir: number) => {
     const newIndex = viewIndex + newDir;
     if (newIndex >= 0 && newIndex <= 2) {
-      setDirection(newDir);
       setViewIndex(newIndex);
     }
   };
+
+  // Touch swipe support without framer-motion
+  const touchStart = useRef(0);
 
   return (
     <div className="min-h-screen bg-white pb-24">
@@ -204,48 +180,41 @@ export default function ProductPage() {
           {/* Product Image Gallery (Pseudo 3D) */}
           <div className="relative bg-gray-50 rounded-3xl p-12 flex items-center justify-center aspect-square overflow-hidden border border-gray-100 group">
 
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.img
-                key={`${selectedVariant.id}-${viewIndex}`}
-                src={`${selectedVariant.images3D[viewIndex]}?w=800`}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                  rotateY: { type: "spring", stiffness: 200, damping: 30 }
-                }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={(e, { offset, velocity }) => {
-                  const swipe = swipePower(offset.x, velocity.x);
-                  if (swipe < -swipeConfidenceThreshold) {
-                    changeView(1);
-                  } else if (swipe > swipeConfidenceThreshold) {
-                    changeView(-1);
-                  }
-                }}
-                alt={product.name}
-                width="800"
-                height="800"
-                fetchPriority="high"
-                className="absolute w-[80%] h-[80%] object-contain mix-blend-multiply cursor-grab active:cursor-grabbing transition-transform duration-500 scale-125 sm:scale-140"
-              />
-            </AnimatePresence>
+            {/* CSS crossfade image viewer — no framer-motion needed */}
+            <div
+              className="absolute w-[80%] h-[80%] cursor-pointer select-none"
+              onTouchStart={e => { touchStart.current = e.touches[0].clientX; }}
+              onTouchEnd={e => {
+                const delta = touchStart.current - e.changedTouches[0].clientX;
+                if (delta > 50) changeView(1);
+                else if (delta < -50) changeView(-1);
+              }}
+            >
+              {[0, 1, 2].map(idx => (
+                <img
+                  key={idx}
+                  src={`${selectedVariant.images3D[idx]}?w=800`}
+                  alt={`${product.name} view ${idx + 1}`}
+                  width="800"
+                  height="800"
+                  fetchPriority={idx === viewIndex ? "high" : "low"}
+                  loading={idx === 1 ? "eager" : "lazy"}
+                  decoding="async"
+                  className="absolute inset-0 w-full h-full object-contain mix-blend-multiply"
+                  style={{
+                    opacity: viewIndex === idx ? 1 : 0,
+                    transition: 'opacity 0.3s ease',
+                  }}
+                />
+              ))}
+            </div>
 
             {/* View Controls */}
             <div className="absolute bottom-6 flex gap-2">
               {[0, 1, 2].map(idx => (
                 <button
                   key={idx}
-                  onClick={() => {
-                    setDirection(idx > viewIndex ? 1 : -1);
-                    setViewIndex(idx);
-                  }}
+                  onClick={() => setViewIndex(idx)}
                   className={`w-2.5 h-2.5 rounded-full transition-all ${viewIndex === idx ? 'bg-black w-8' : 'bg-gray-300 hover:bg-gray-400'
                     }`}
                   aria-label={`View ${idx}`}

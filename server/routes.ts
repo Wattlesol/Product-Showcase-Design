@@ -8,6 +8,24 @@ import { currentInventory } from "./inventory";
 import nodemailer from "nodemailer";
 import { comparePasswords } from "./auth";
 
+// ── In-memory image cache (LRU-style, max 200 entries ~50MB) ─────────────────
+// Prevents re-processing the same image through sharp on every request
+const imageCache = new Map<string, { data: Buffer; contentType: string; timestamp: number }>();
+const IMAGE_CACHE_MAX = 200;
+function getCacheKey(variantId: string, type: string, width: number | undefined, accept: string) {
+  const fmt = accept.includes("image/avif") ? "avif" : "webp";
+  return `${variantId}:${type}:${width ?? "auto"}:${fmt}`;
+}
+function setImageCache(key: string, data: Buffer, contentType: string) {
+  if (imageCache.size >= IMAGE_CACHE_MAX) {
+    // Evict the oldest entry
+    const oldest = imageCache.keys().next().value;
+    if (oldest) imageCache.delete(oldest);
+  }
+  imageCache.set(key, { data, contentType, timestamp: Date.now() });
+}
+
+
 // Configure email transporter
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
@@ -104,6 +122,18 @@ export async function registerRoutes(
 
       if (!image) return res.status(404).send("Image not found");
 
+      // ── Check in-memory cache first ───────────────────────────────────────
+      const acceptHeader = req.headers.accept || "";
+      const cacheKey = getCacheKey(variantId, type, width, acceptHeader);
+      const cached = imageCache.get(cacheKey);
+      if (cached) {
+        res.setHeader("Content-Type", cached.contentType);
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        res.setHeader("Vary", "Accept");
+        res.setHeader("X-Cache", "HIT");
+        return res.send(cached.data);
+      }
+
       // Critical optimization: Resize and compress using sharp
       let finalData = image.data;
       let contentType = "image/webp";
@@ -127,8 +157,7 @@ export async function registerRoutes(
           });
         }
         
-        // Content Negotiation: Check for AVIF support (even better than WebP)
-        const acceptHeader = req.headers.accept || "";
+        // Content Negotiation: serve AVIF to modern browsers, WebP fallback
         if (acceptHeader.includes("image/avif")) {
           finalData = await pipeline
             .avif({ quality: 50, effort: 4 }) // Ultra-efficient AVIF
@@ -147,9 +176,13 @@ export async function registerRoutes(
         console.error("Sharp processing failed for variantId:", variantId, sharpError);
       }
 
+      // Also remove the duplicate acceptHeader declaration (already declared above)
       res.setHeader("Content-Type", contentType);
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      res.setHeader("Vary", "Accept"); // Ensures AVIF and WebP are cached separately
+      res.setHeader("Vary", "Accept");
+      res.setHeader("X-Cache", "MISS");
+      // Store in memory cache for subsequent requests
+      setImageCache(cacheKey, finalData as Buffer, contentType);
       res.send(finalData);
     } catch (e) {
       console.error("Image route error:", e);
