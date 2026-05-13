@@ -99,7 +99,8 @@ app.use((req, res, next) => {
       const sharp = (await import("sharp")).default;
       const distPath = path.resolve(import.meta.dirname, "public");
       const filePath = path.join(distPath, "assets", filename);
-
+      if (fs.existsSync(filePath)) {
+        const buffer = await fs.promises.readFile(filePath);
         const optimized = await sharp(buffer)
           .rotate()
           .resize(1200, null, { withoutEnlargement: true })
