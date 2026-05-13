@@ -30,6 +30,8 @@ export default function ProductPage() {
   });
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
+  const [viewIndex, setViewIndex] = useState(1);
+  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
     if (product && !selectedVariant) {
@@ -44,10 +46,6 @@ export default function ProductPage() {
       </div>
     );
   }
-
-  // 0 = Left, 1 = Center, 2 = Right
-  const [viewIndex, setViewIndex] = useState(1);
-  const [direction, setDirection] = useState(0);
 
   // Track product view
   useEffect(() => {

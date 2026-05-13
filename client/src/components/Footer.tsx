@@ -31,17 +31,17 @@ export default function Footer() {
                         <ul className="space-y-4">
                             <li><a href="/#shoes-collection" className="text-gray-400 hover:text-white transition-colors">Men's Shoes</a></li>
                             <li><a href="/#bags-collection" className="text-gray-400 hover:text-white transition-colors">Bags</a></li>
-                            <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">New Arrivals</a></Link></li>
-                            <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">Sale</a></Link></li>
+                            <li><Link href="/" className="text-gray-400 hover:text-white transition-colors">New Arrivals</Link></li>
+                            <li><Link href="/" className="text-gray-400 hover:text-white transition-colors">Sale</Link></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="font-bold text-lg mb-6 tracking-wide">Support</h4>
                         <ul className="space-y-4">
-                            <li><Link href="/contact"><a className="text-gray-400 hover:text-white transition-colors">Contact Us</a></Link></li>
-                            <li><Link href="/faq"><a className="text-gray-400 hover:text-white transition-colors">FAQs</a></Link></li>
-                            <li><Link href="/shipping-policy"><a className="text-gray-400 hover:text-white transition-colors">Shipping & Returns</a></Link></li>
+                            <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
+                            <li><Link href="/faq" className="text-gray-400 hover:text-white transition-colors">FAQs</Link></li>
+                            <li><Link href="/shipping-policy" className="text-gray-400 hover:text-white transition-colors">Shipping & Returns</Link></li>
                             <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Size Guide</a></li>
                         </ul>
                     </div>
@@ -52,8 +52,8 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} Lumina Footwear. All rights reserved.
                     </p>
                     <div className="flex space-x-6 text-sm text-gray-500">
-                        <Link href="/privacy-policy"><a className="hover:text-white transition-colors">Privacy Policy</a></Link>
-                        <Link href="/terms-conditions"><a className="hover:text-white transition-colors">Terms of Service</a></Link>
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms-conditions" className="hover:text-white transition-colors">Terms of Service</Link>
                     </div>
                 </div>
             </div>
