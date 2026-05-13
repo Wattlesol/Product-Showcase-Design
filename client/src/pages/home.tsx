@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState, useCallback, useEffect } from "react";
 import { useProducts } from "@/hooks/use-products";
+import { Product, Variant } from "@shared/schema";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -184,7 +185,7 @@ export default function Home() {
   );
 }
 
-function ProductCard({ product, setLocation }: { product: any, setLocation: any }) {
+function ProductCard({ product, setLocation }: { product: Product, setLocation: (url: string) => void }) {
   return (
     <div className="group cursor-pointer" onClick={() => setLocation(`/product/${product.id}`)}>
       <div className="relative aspect-[4/3] bg-gray-100/50 rounded-3xl mb-4 overflow-hidden flex items-center justify-center p-6 border border-gray-100 group-hover:bg-gray-100 transition-all duration-500">
@@ -201,13 +202,15 @@ function ProductCard({ product, setLocation }: { product: any, setLocation: any 
         <div className="flex justify-between items-start mb-1">
           <h3 className="font-bold text-sm leading-tight">{product.name}</h3>
           <div className="flex flex-col items-end">
-            <span className="text-[10px] text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</span>
+            {product.originalPrice && (
+              <span className="text-[10px] text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</span>
+            )}
             <span className="font-bold text-sm">PKR {product.price.toFixed(2)}</span>
           </div>
         </div>
         <div className="flex justify-between items-center text-sm">
           <div className="flex items-center gap-1.5">
-            {product.category === "Shoes" && product.variants.map((variant: any) => (
+            {product.category === "Shoes" && product.variants.map((variant: Variant) => (
               <div
                 key={variant.id}
                 className="w-4 h-4 rounded-full border border-gray-300"

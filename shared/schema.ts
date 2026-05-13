@@ -16,6 +16,25 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
+export interface Variant {
+  id: string;
+  color: string;
+  image: string;
+  images3D: string[];
+  colorCode: string;
+}
+
+export interface CartItem {
+  id: number;
+  variantId: string;
+  name: string;
+  price: number;
+  image: string;
+  color: string;
+  size: string;
+  quantity: number;
+}
+
 export const products = pgTable("products", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
@@ -24,7 +43,7 @@ export const products = pgTable("products", {
   rating: text("rating").default("5.0"),
   category: text("category").notNull(),
   description: text("description").notNull(),
-  variants: jsonb("variants").notNull(), // Array of variant objects
+  variants: jsonb("variants").$type<Variant[]>().notNull(),
   active: boolean("active").default(true),
 });
 
@@ -46,7 +65,7 @@ export const orders = pgTable("orders", {
   address: text("address").notNull(),
   city: text("city").notNull(),
   province: text("province").notNull(),
-  cartItems: jsonb("cart_items").notNull(),
+  cartItems: jsonb("cart_items").$type<CartItem[]>().notNull(),
   totalPrice: integer("total_price").notNull(),
   status: text("status").notNull().default("pending"),
   timestamp: timestamp("timestamp").default(sql`now()`),
@@ -119,6 +138,10 @@ export type ProductImage = typeof productImages.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Visit = typeof visits.$inferSelect;
+export type InsertVisit = z.infer<typeof insertVisitSchema>;
 export type Lead = typeof leads.$inferSelect;
+export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type OrderComment = typeof orderComments.$inferSelect;
+export type InsertOrderComment = z.infer<typeof insertOrderCommentSchema>;

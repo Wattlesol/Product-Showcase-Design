@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cart-context";
 import { useTracker } from "@/hooks/use-tracker";
 import { useQuery } from "@tanstack/react-query";
 import { useProduct } from "@/hooks/use-products";
+import { Variant } from "@shared/schema";
 
 export default function ProductPage() {
   const [, params] = useRoute("/product/:id");
@@ -28,7 +29,7 @@ export default function ProductPage() {
     }
   });
 
-  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
   useEffect(() => {
     if (product && !selectedVariant) {
@@ -274,14 +275,16 @@ export default function ProductPage() {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex items-center text-yellow-500">
-                  {[1, 2, 3, 4, 5].map(i => <Star key={i} className={`w-4 h-4 ${i <= Math.floor(product.rating) ? 'fill-current' : ''}`} />)}
+                  {[1, 2, 3, 4, 5].map(i => <Star key={i} className={`w-4 h-4 ${i <= Math.floor(Number(product.rating || "0")) ? 'fill-current' : ''}`} />)}
                 </div>
-                <span className="text-sm font-medium text-gray-500">({product.rating} / 5.0)</span>
+                <span className="text-sm font-medium text-gray-500">({product.rating})</span>
               </div>
               <h1 className="text-4xl font-bold mb-4 tracking-tight">{product.name}</h1>
               <div className="flex items-baseline gap-3 mb-4">
                 <p className="text-3xl font-bold text-gray-900">PKR {product.price.toFixed(2)}</p>
-                <p className="text-xl text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</p>
+                {product.originalPrice && (
+                  <p className="text-xl text-gray-400 line-through">PKR {product.originalPrice.toFixed(2)}</p>
+                )}
               </div>
             </div>
 
