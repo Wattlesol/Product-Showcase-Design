@@ -15,6 +15,24 @@ declare module "http" {
   }
 }
 
+// ── Gzip compression for all text-based responses ──────────────────────────
+// This alone reduces JS/CSS/JSON by 60-70%, critical for PageSpeed
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const compression = require("compression");
+  app.use(compression({
+    level: 6,
+    threshold: 1024, // Only compress responses > 1KB
+    filter: (req: Request, res: Response) => {
+      // Don't compress images (already compressed by sharp)
+      if (req.path.startsWith('/api/products/image')) return false;
+      return compression.filter(req, res);
+    }
+  }));
+} catch (e) {
+  console.warn("compression module not found, skipping gzip");
+}
+
 app.use(
   express.json({
     verify: (req, _res, buf) => {

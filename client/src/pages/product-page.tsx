@@ -207,7 +207,7 @@ export default function ProductPage() {
             <AnimatePresence initial={false} custom={direction}>
               <motion.img
                 key={`${selectedVariant.id}-${viewIndex}`}
-                src={`${selectedVariant.images3D[viewIndex]}?w=1000`}
+                src={`${selectedVariant.images3D[viewIndex]}?w=800`}
                 custom={direction}
                 variants={slideVariants}
                 initial="enter"
@@ -224,12 +224,14 @@ export default function ProductPage() {
                 onDragEnd={(e, { offset, velocity }) => {
                   const swipe = swipePower(offset.x, velocity.x);
                   if (swipe < -swipeConfidenceThreshold) {
-                    changeView(1); // Swipe left = next view (Right profile)
+                    changeView(1);
                   } else if (swipe > swipeConfidenceThreshold) {
-                    changeView(-1); // Swipe right = prev view (Left profile)
+                    changeView(-1);
                   }
                 }}
                 alt={product.name}
+                width="800"
+                height="800"
                 fetchPriority="high"
                 className="absolute w-[80%] h-[80%] object-contain mix-blend-multiply cursor-grab active:cursor-grabbing transition-transform duration-500 scale-125 sm:scale-140"
               />

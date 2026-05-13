@@ -149,6 +149,7 @@ export async function registerRoutes(
 
       res.setHeader("Content-Type", contentType);
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.setHeader("Vary", "Accept"); // Ensures AVIF and WebP are cached separately
       res.send(finalData);
     } catch (e) {
       console.error("Image route error:", e);
