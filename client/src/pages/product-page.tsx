@@ -39,14 +39,6 @@ export default function ProductPage() {
     }
   }, [product, selectedVariant]);
 
-  if (isLoading || !product || !selectedVariant) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
   // Track product view
   useEffect(() => {
     if (product) {
@@ -94,6 +86,14 @@ export default function ProductPage() {
       }
     }
   }, [product]);
+
+  if (isLoading || !product || !selectedVariant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const handleAddToCart = () => {
     // Build the new item to add

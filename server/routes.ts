@@ -337,7 +337,7 @@ export async function registerRoutes(
               lastUpdated: new Date().toISOString(),
               status: "pending"
             });
-            await storage.markLeadAsOrdered(shipping.sessionId);
+            await storage.markLeadAsOrdered(shipping.sessionId, shipping.phone);
           }
 
           // Sheets logging

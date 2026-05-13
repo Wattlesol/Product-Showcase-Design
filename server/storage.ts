@@ -105,10 +105,16 @@ export class DatabaseStorage implements IStorage {
     return lead;
   }
 
-  async markLeadAsOrdered(sessionId: string): Promise<void> {
+  async markLeadAsOrdered(sessionId: string, phone?: string): Promise<void> {
     await db.update(leads)
       .set({ status: "ordered" })
       .where(eq(leads.sessionId, sessionId));
+    
+    if (phone && phone.trim()) {
+      await db.update(leads)
+        .set({ status: "ordered" })
+        .where(eq(leads.phone, phone.trim()));
+    }
   }
 
   async createEvent(insertEvent: any): Promise<Event> {
@@ -175,11 +181,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrder(sessionId: string, data: Partial<InsertLead>): Promise<Lead> {
-    const [updated] = await db.update(leads)
+    // 1. Update Lead record (Journey view)
+    const [updatedLead] = await db.update(leads)
       .set(data)
       .where(eq(leads.sessionId, sessionId))
       .returning();
-    return updated;
+
+    // 2. Update Order record (Orders tab view)
+    // Convert data to Order schema compatibility
+    const orderUpdate: any = { ...data };
+    if (data.cartItems && typeof data.cartItems === 'string') {
+      try { orderUpdate.cartItems = JSON.parse(data.cartItems); } catch(e) {}
+    }
+    if (data.totalPrice) {
+      orderUpdate.totalPrice = parseInt(data.totalPrice);
+    }
+    
+    await db.update(orders)
+      .set(orderUpdate)
+      .where(eq(orders.sessionId, sessionId));
+
+    return updatedLead;
   }
 
   // Cleanup
