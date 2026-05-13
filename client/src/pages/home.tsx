@@ -29,6 +29,36 @@ const heroSlides = [
   }
 ];
 
+function LazySection({ children, id, title, subtitle, className }: { children: React.ReactNode, id: string, title: string, subtitle: string, className?: string }) {
+  const [hasEntered, setHasEntered] = useState(false);
+  
+  return (
+    <motion.section 
+      id={id} 
+      className={className}
+      onViewportEnter={() => setHasEntered(true)}
+      viewport={{ once: true, margin: "400px" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tighter">{title}</h2>
+            <p className="text-gray-500 max-w-2xl">{subtitle}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {hasEntered ? children : (
+            <div className="col-span-full h-96 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
 export default function Home() {
   const [, setLocation] = useLocation();
   const { data: products, isLoading } = useProducts();
@@ -116,6 +146,8 @@ export default function Home() {
                         <motion.img
                           src={`${slide.image}?w=1200`}
                           alt={slide.title}
+                          fetchPriority={slide.id === 1 ? "high" : "auto"}
+                          loading={slide.id === 1 ? "eager" : "lazy"}
                           className="w-full h-auto drop-shadow-[0_25px_35px_rgba(0,0,0,0.3)] object-contain mix-blend-multiply transition-all duration-500 hover:scale-105"
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
@@ -142,41 +174,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Shoes Collection */}
-      <section id="shoes-collection" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tighter">Signature Collection</h2>
-              <p className="text-gray-500 max-w-2xl">Masterfully crafted for unparalleled support.</p>
-            </div>
-          </div>
+      <LazySection 
+        id="shoes-collection" 
+        title="Signature Collection" 
+        subtitle="Masterfully crafted for unparalleled support."
+        className="py-24 bg-white"
+      >
+        {shoes.map((product) => (
+          <ProductCard key={product.id} product={product} setLocation={setLocation} />
+        ))}
+      </LazySection>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {shoes.map((product) => (
-              <ProductCard key={product.id} product={product} setLocation={setLocation} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Bags Collection */}
-      <section id="bags-collection" className="py-24 bg-gray-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tighter">Handbags Collection</h2>
-              <p className="text-gray-500 max-w-2xl">Elegance meets functionality in every stitch.</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {bags.map((product) => (
-              <ProductCard key={product.id} product={product} setLocation={setLocation} />
-            ))}
-          </div>
-        </div>
-      </section>
+      <LazySection 
+        id="bags-collection" 
+        title="Handbags Collection" 
+        subtitle="Elegance meets functionality in every stitch."
+        className="py-24 bg-gray-50/50"
+      >
+        {bags.map((product) => (
+          <ProductCard key={product.id} product={product} setLocation={setLocation} />
+        ))}
+      </LazySection>
     </div>
   );
 }

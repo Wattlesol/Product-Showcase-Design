@@ -101,13 +101,26 @@ app.use((req, res, next) => {
       const filePath = path.join(distPath, "assets", filename);
       if (fs.existsSync(filePath)) {
         const buffer = await fs.promises.readFile(filePath);
-        const optimized = await sharp(buffer)
-          .rotate()
-          .resize(1200, null, { withoutEnlargement: true })
-          .webp({ quality: 60, effort: 6 })
-          .toBuffer();
+        const pipeline = sharp(buffer).rotate();
+        let finalContentType = "image/webp";
+        let optimized;
+
+        // Content Negotiation
+        const acceptHeader = req.headers.accept || "";
+        if (acceptHeader.includes("image/avif")) {
+          optimized = await pipeline
+            .resize(1200, null, { withoutEnlargement: true })
+            .avif({ quality: 50, effort: 4 })
+            .toBuffer();
+          finalContentType = "image/avif";
+        } else {
+          optimized = await pipeline
+            .resize(1200, null, { withoutEnlargement: true })
+            .webp({ quality: 55, effort: 6 })
+            .toBuffer();
+        }
         
-        res.setHeader("Content-Type", "image/webp");
+        res.setHeader("Content-Type", finalContentType);
         res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
         return res.send(optimized);
       }

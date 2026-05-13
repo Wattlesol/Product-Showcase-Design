@@ -106,6 +106,8 @@ export async function registerRoutes(
 
       // Critical optimization: Resize and compress using sharp
       let finalData = image.data;
+      let contentType = "image/webp";
+      
       try {
         const sharp = (await import("sharp")).default;
         const pipeline = sharp(image.data);
@@ -125,18 +127,27 @@ export async function registerRoutes(
           });
         }
         
-        finalData = await pipeline
-          .webp({ 
-            quality: 60, // Reduced from 75 to 60 for massive savings
-            effort: 6,
-            smartSubsample: true
-          }) 
-          .toBuffer();
+        // Content Negotiation: Check for AVIF support (even better than WebP)
+        const acceptHeader = req.headers.accept || "";
+        if (acceptHeader.includes("image/avif")) {
+          finalData = await pipeline
+            .avif({ quality: 50, effort: 4 }) // Ultra-efficient AVIF
+            .toBuffer();
+          contentType = "image/avif";
+        } else {
+          finalData = await pipeline
+            .webp({ 
+              quality: 55, // Aggressive 55 quality for mobile
+              effort: 6,
+              smartSubsample: true
+            }) 
+            .toBuffer();
+        }
       } catch (sharpError) {
         console.error("Sharp processing failed for variantId:", variantId, sharpError);
       }
 
-      res.setHeader("Content-Type", "image/webp");
+      res.setHeader("Content-Type", contentType);
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
       res.send(finalData);
     } catch (e) {
