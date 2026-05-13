@@ -102,9 +102,10 @@ export async function registerRoutes(
       }
 
       if (!image) return res.status(404).send("Image not found");
-
+      
+      // Critical optimization: Set long-term cache headers for images
       res.setHeader("Content-Type", image.contentType || "image/webp");
-      res.setHeader("Cache-Control", "public, max-age=31536000");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
       res.send(image.data);
     } catch (e) {
       res.status(500).send("Error serving image");

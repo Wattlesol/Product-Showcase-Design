@@ -83,6 +83,29 @@ app.use((req, res, next) => {
   
   await registerRoutes(httpServer, app);
 
+  // Fallback for sitemap.xml if not handled by registerRoutes (to be absolutely sure)
+  app.get("/sitemap.xml", async (_req, res) => {
+    console.log("Sitemap route hit!");
+    try {
+      const { storage } = await import("./storage");
+      const dbProducts = await storage.getProducts();
+      const baseUrl = "https://luminafootwear.store";
+      const staticPages = ["", "/blog", "/faq", "/contact", "/shipping-policy", "/privacy-policy", "/terms-conditions"];
+      let sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+      staticPages.forEach(page => {
+        sitemap += `\n  <url>\n    <loc>${baseUrl}${page}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${page === "" ? "1.0" : "0.7"}</priority>\n  </url>`;
+      });
+      dbProducts.forEach(product => {
+        sitemap += `\n  <url>\n    <loc>${baseUrl}/product/${product.id}</loc>\n    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>`;
+      });
+      sitemap += "\n</urlset>";
+      res.header("Content-Type", "application/xml");
+      res.send(sitemap);
+    } catch (e) {
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
