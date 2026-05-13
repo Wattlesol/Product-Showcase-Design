@@ -100,9 +100,8 @@ app.use((req, res, next) => {
       const distPath = path.resolve(import.meta.dirname, "public");
       const filePath = path.join(distPath, "assets", filename);
 
-      if (fs.existsSync(filePath)) {
-        const buffer = await fs.promises.readFile(filePath);
         const optimized = await sharp(buffer)
+          .rotate()
           .resize(1200, null, { withoutEnlargement: true })
           .webp({ quality: 60, effort: 6 })
           .toBuffer();

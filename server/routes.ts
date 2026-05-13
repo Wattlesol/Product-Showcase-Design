@@ -110,8 +110,8 @@ export async function registerRoutes(
         const sharp = (await import("sharp")).default;
         const pipeline = sharp(image.data);
         
-        // Strip EXIF data to save bytes
-        pipeline.rotate().strip(); 
+        // Ensure correct orientation (handles EXIF orientation)
+        pipeline.rotate(); 
 
         const metadata = await pipeline.metadata();
 
