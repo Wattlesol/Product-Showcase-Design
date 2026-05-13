@@ -118,7 +118,7 @@ export default function Home() {
                         }}
                       >
                         <motion.img
-                          src={slide.image}
+                          src={`${slide.image}?w=1200`}
                           alt={slide.title}
                           className="w-full h-auto drop-shadow-[0_25px_35px_rgba(0,0,0,0.3)] object-contain mix-blend-multiply transition-all duration-500 hover:scale-105"
                           initial={{ scale: 0.8, opacity: 0 }}
@@ -190,8 +190,9 @@ function ProductCard({ product, setLocation }: { product: Product, setLocation: 
     <div className="group cursor-pointer" onClick={() => setLocation(`/product/${product.id}`)}>
       <div className="relative aspect-[4/3] bg-gray-100/50 rounded-3xl mb-4 overflow-hidden flex items-center justify-center p-6 border border-gray-100 group-hover:bg-gray-100 transition-all duration-500">
         <img
-          src={product.variants[0].image}
+          src={`${product.variants[0].image}?w=600`}
           alt={product.name}
+          loading="lazy"
           className="w-full h-auto object-contain mix-blend-multiply scale-110 group-hover:scale-125 transition-transform duration-700"
         />
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">

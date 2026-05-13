@@ -84,11 +84,12 @@ export async function registerRoutes(
     }
   });
 
-  // Serve Image Blobs
+  // Serve Image Blobs with Optimization
   app.get("/api/products/image/:variantId/:type", async (req, res) => {
     try {
       const { variantId, type } = req.params;
       const productId = req.query.productId ? parseInt(req.query.productId as string) : undefined;
+      const width = req.query.w ? parseInt(req.query.w as string) : undefined;
       
       let image;
       if (productId) {
@@ -102,12 +103,33 @@ export async function registerRoutes(
       }
 
       if (!image) return res.status(404).send("Image not found");
-      
-      // Critical optimization: Set long-term cache headers for images
-      res.setHeader("Content-Type", image.contentType || "image/webp");
+
+      // Critical optimization: Resize and compress using sharp
+      let finalData = image.data;
+      try {
+        const sharp = (await import("sharp")).default;
+        const pipeline = sharp(image.data);
+        const metadata = await pipeline.metadata();
+
+        // Default optimization: Max width 1200px and high compression
+        let resizeWidth = width || (metadata.width && metadata.width > 1200 ? 1200 : null);
+        
+        if (resizeWidth) {
+          pipeline.resize(resizeWidth, null, { withoutEnlargement: true });
+        }
+        
+        finalData = await pipeline
+          .webp({ quality: 75, effort: 6 }) 
+          .toBuffer();
+      } catch (sharpError) {
+        console.error("Sharp processing failed, falling back to original:", sharpError);
+      }
+
+      res.setHeader("Content-Type", "image/webp");
       res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-      res.send(image.data);
+      res.send(finalData);
     } catch (e) {
+      console.error("Image route error:", e);
       res.status(500).send("Error serving image");
     }
   });

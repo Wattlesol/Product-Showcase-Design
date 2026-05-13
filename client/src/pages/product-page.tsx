@@ -207,7 +207,7 @@ export default function ProductPage() {
             <AnimatePresence initial={false} custom={direction}>
               <motion.img
                 key={`${selectedVariant.id}-${viewIndex}`}
-                src={selectedVariant.images3D[viewIndex]}
+                src={`${selectedVariant.images3D[viewIndex]}?w=1000`}
                 custom={direction}
                 variants={slideVariants}
                 initial="enter"
