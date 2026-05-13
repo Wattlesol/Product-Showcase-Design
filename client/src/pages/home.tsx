@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useState, useCallback, useEffect } from "react";
@@ -8,17 +8,13 @@ import { Product, Variant } from "@shared/schema";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
-// Hero Images
-import imgBlackShoeHero from "@assets/products/8080_BLK_L.webp";
-import imgBagHero from "@assets/products/IDT-04_C.webp";
-
 const heroSlides = [
   {
     id: 1,
     title: "Step into Effortless Comfort",
     subtitle: "New Collection 2026",
     description: "Handcrafted premium slip-on shoes designed for the modern professional. Experience unmatched all-day comfort.",
-    image: imgBlackShoeHero,
+    image: "/api/products/image/8080-blk/L?w=1200",
     category: "Shoes",
     target: "shoes-collection"
   },
@@ -27,7 +23,7 @@ const heroSlides = [
     title: "Carry Your Ambition",
     subtitle: "Handbag Series",
     description: "Elegant, durable, and spacious. Our premium leather handbags are crafted for those who move with purpose.",
-    image: imgBagHero,
+    image: "/api/products/image/IDT-04/C?w=1200",
     category: "Bags",
     target: "bags-collection"
   }

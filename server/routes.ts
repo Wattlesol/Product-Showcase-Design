@@ -109,20 +109,31 @@ export async function registerRoutes(
       try {
         const sharp = (await import("sharp")).default;
         const pipeline = sharp(image.data);
+        
+        // Strip EXIF data to save bytes
+        pipeline.rotate().strip(); 
+
         const metadata = await pipeline.metadata();
 
-        // Default optimization: Max width 1200px and high compression
+        // Default optimization: Max width 1200px and aggressive compression
         let resizeWidth = width || (metadata.width && metadata.width > 1200 ? 1200 : null);
         
         if (resizeWidth) {
-          pipeline.resize(resizeWidth, null, { withoutEnlargement: true });
+          pipeline.resize(resizeWidth, null, { 
+            withoutEnlargement: true,
+            fit: 'inside'
+          });
         }
         
         finalData = await pipeline
-          .webp({ quality: 75, effort: 6 }) 
+          .webp({ 
+            quality: 60, // Reduced from 75 to 60 for massive savings
+            effort: 6,
+            smartSubsample: true
+          }) 
           .toBuffer();
       } catch (sharpError) {
-        console.error("Sharp processing failed, falling back to original:", sharpError);
+        console.error("Sharp processing failed for variantId:", variantId, sharpError);
       }
 
       res.setHeader("Content-Type", "image/webp");

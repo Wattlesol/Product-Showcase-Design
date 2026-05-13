@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import path from "path";
+import fs from "fs";
 import "dotenv/config";
 
 const app = express();
@@ -81,6 +83,40 @@ app.use((req, res, next) => {
   console.log(`📋 HOST: 0.0.0.0`);
   console.log(`================================\n`);
   
+  // Global Image Optimization Middleware for static assets
+  app.get("/assets/:filename", async (req, res, next) => {
+    const { filename } = req.params;
+    if (!filename.match(/\.(webp|jpg|jpeg|png)$/i)) {
+      return next();
+    }
+
+    try {
+      const { serveStatic } = await import("./static");
+      // This is a bit tricky because we need to find the physical path
+      // In prod it's in public/assets, in dev it might be handled by Vite
+      // But we can try to intercept it anyway
+      
+      const sharp = (await import("sharp")).default;
+      const distPath = path.resolve(import.meta.dirname, "public");
+      const filePath = path.join(distPath, "assets", filename);
+
+      if (fs.existsSync(filePath)) {
+        const buffer = await fs.promises.readFile(filePath);
+        const optimized = await sharp(buffer)
+          .resize(1200, null, { withoutEnlargement: true })
+          .webp({ quality: 60, effort: 6 })
+          .toBuffer();
+        
+        res.setHeader("Content-Type", "image/webp");
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        return res.send(optimized);
+      }
+    } catch (e) {
+      // Fallback to normal static serving if optimization fails
+    }
+    next();
+  });
+
   await registerRoutes(httpServer, app);
 
   // Fallback for sitemap.xml if not handled by registerRoutes (to be absolutely sure)
