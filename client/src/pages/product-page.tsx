@@ -30,6 +30,8 @@ export default function ProductPage() {
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [viewIndex, setViewIndex] = useState(1);
+  // Touch swipe ref — must be declared at top level, not after early returns
+  const touchStart = useRef(0);
 
   useEffect(() => {
     if (product && !selectedVariant) {
@@ -168,9 +170,6 @@ export default function ProductPage() {
       setViewIndex(newIndex);
     }
   };
-
-  // Touch swipe support without framer-motion
-  const touchStart = useRef(0);
 
   return (
     <div className="min-h-screen bg-white pb-24">
