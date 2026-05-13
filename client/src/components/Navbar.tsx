@@ -38,6 +38,7 @@ const Navbar: React.FC = () => {
                             setTimeout(() => document.getElementById('bags-collection')?.scrollIntoView({ behavior: 'smooth' }), 100);
                         }} className="hover:text-black transition-colors">Bags</button>
                         <button onClick={() => setLocation("/blog")} className="hover:text-black transition-colors">Blog</button>
+                        <button onClick={() => setLocation("/contact")} className="hover:text-black transition-colors">Contact</button>
                     </div>
 
                     <div className="flex items-center gap-4">

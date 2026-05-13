@@ -171,12 +171,12 @@ export const products = [
     },
     {
         id: 10,
-        name: "Midnight Navy",
+        name: "Contrast Mocha Tote",
         price: 5289.00,
         originalPrice: 7499.00,
         rating: 4.8,
         category: "Bags",
-        description: "A deep, dark navy finish that exudes professionalism. Reinforced handles and ergonomic design.",
+        description: "Beautiful mocha brown with contrasting stitching. A classic look that never goes out of style.",
         variants: [
             { id: "MNT-05", color: "Navy", image: imgMNT05_C, images3D: [imgMNT05_L, imgMNT05_C, imgMNT05_R], colorCode: "#191970" },
         ]
@@ -207,12 +207,12 @@ export const products = [
     },
     {
         id: 13,
-        name: "Contrast Mocha Tote",
+        name: "Midnight Navy",
         price: 3286.00,
         originalPrice: 4799.00,
         rating: 4.8,
         category: "Bags",
-        description: "Beautiful mocha brown with contrasting stitching. A classic look that never goes out of style.",
+        description: "A deep, dark navy finish that exudes professionalism. Reinforced handles and ergonomic design.",
         variants: [
             { id: "CMT-08", color: "Mocha", image: imgCMT08_C, images3D: [imgCMT08_L, imgCMT08_C, imgCMT08_R], colorCode: "#7b3f00" },
         ]

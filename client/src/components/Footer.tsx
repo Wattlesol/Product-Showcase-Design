@@ -1,4 +1,4 @@
-import { ArrowRight, Facebook, Instagram, Twitter } from "lucide-react";
+import { ArrowRight, Facebook, Instagram, Music } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Footer() {
@@ -12,14 +12,14 @@ export default function Footer() {
                             We design premium footwear for the modern professional. Effortless comfort without compromising on style.
                         </p>
                         <div className="flex space-x-4">
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
+                            <a href="https://www.instagram.com/lumina._shoes?igsh=MWtyOTNua291emkzbQ==" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
                                 <Instagram className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
+                            <a href="https://www.facebook.com/share/18bjgzd3i2/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
                                 <Facebook className="w-5 h-5" />
                             </a>
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors">
-                                <Twitter className="w-5 h-5" />
+                            <a href="https://www.tiktok.com/@lumina.shoes?_r=1&_t=ZS-96JZPHAH79E" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-colors" title="TikTok">
+                                <Music className="w-5 h-5" />
                             </a>
                         </div>
                     </div>
@@ -27,8 +27,8 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-lg mb-6 tracking-wide">Shop</h4>
                         <ul className="space-y-4">
-                            <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">Men's Shoes</a></Link></li>
-                            <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">Accessories</a></Link></li>
+                            <li><a href="/#shoes-collection" className="text-gray-400 hover:text-white transition-colors">Men's Shoes</a></li>
+                            <li><a href="/#bags-collection" className="text-gray-400 hover:text-white transition-colors">Bags</a></li>
                             <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">New Arrivals</a></Link></li>
                             <li><Link href="/"><a className="text-gray-400 hover:text-white transition-colors">Sale</a></Link></li>
                         </ul>
@@ -37,9 +37,9 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold text-lg mb-6 tracking-wide">Support</h4>
                         <ul className="space-y-4">
-                            <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQs</a></li>
-                            <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Shipping & Returns</a></li>
+                            <li><Link href="/contact"><a className="text-gray-400 hover:text-white transition-colors">Contact Us</a></Link></li>
+                            <li><Link href="/faq"><a className="text-gray-400 hover:text-white transition-colors">FAQs</a></Link></li>
+                            <li><Link href="/shipping-policy"><a className="text-gray-400 hover:text-white transition-colors">Shipping & Returns</a></Link></li>
                             <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Size Guide</a></li>
                         </ul>
                     </div>
@@ -50,8 +50,8 @@ export default function Footer() {
                         &copy; {new Date().getFullYear()} Lumina Footwear. All rights reserved.
                     </p>
                     <div className="flex space-x-6 text-sm text-gray-500">
-                        <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                        <Link href="/privacy-policy"><a className="hover:text-white transition-colors">Privacy Policy</a></Link>
+                        <Link href="/terms-conditions"><a className="hover:text-white transition-colors">Terms of Service</a></Link>
                     </div>
                 </div>
             </div>
