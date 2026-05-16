@@ -40,6 +40,13 @@ export function useTracker(options: { skipHit?: boolean } = {}) {
           // @ts-ignore
           window.fbq('track', 'PageView');
         }
+
+        // TikTok Pixel Track PageView
+        // @ts-ignore
+        if (window.ttq) {
+          // @ts-ignore
+          window.ttq.page();
+        }
       } catch (e) {
         console.error("Tracking failed", e);
       }
@@ -67,8 +74,26 @@ export function useTracker(options: { skipHit?: boolean } = {}) {
     }
   };
 
+  const trackTikTok = (eventName: string, data: any) => {
+    // @ts-ignore
+    if (window.ttq) {
+      // @ts-ignore
+      window.ttq.track(eventName, data);
+    }
+  };
+
+  const identifyTikTok = (userData: { email?: string; phone_number?: string; external_id?: string }) => {
+    // @ts-ignore
+    if (window.ttq) {
+      // @ts-ignore
+      window.ttq.identify(userData);
+    }
+  };
+
   return {
     sessionId: sessionStorage.getItem("lumina_session"),
-    trackEvent
+    trackEvent,
+    trackTikTok,
+    identifyTikTok
   };
 }

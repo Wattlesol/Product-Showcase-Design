@@ -7,11 +7,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Truck, Lock, ChevronRight, PackageCheck, ShoppingBag, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/lib/cart-context";
+import { useTracker } from "@/hooks/use-tracker";
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { items, subtotal, clearCart } = useCart();
+  const { trackTikTok, identifyTikTok } = useTracker({ skipHit: true });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
 
@@ -38,22 +40,15 @@ export default function Checkout() {
   // Track InitiateCheckout
   useEffect(() => {
     if (items.length > 0 && !orderConfirmed) {
-      // TikTok Track InitiateCheckout
-      // @ts-ignore
-      const ttq = window.ttq;
-      if (ttq) {
-        ttq.track("InitiateCheckout", {
-          "contents": items.map(item => ({
-            "content_id": String(item.id),
-            "content_type": "product",
-            "content_name": item.name,
-            "quantity": item.quantity,
-            "price": item.price
-          })),
-          "value": subtotal,
-          "currency": "PKR"
-        });
-      }
+      trackTikTok("InitiateCheckout", {
+        "contents": items.map(item => ({
+          "content_id": String(item.id),
+          "content_type": "product",
+          "content_name": item.name
+        })),
+        "value": subtotal,
+        "currency": "PKR"
+      });
 
       // Meta Pixel Track InitiateCheckout
       // @ts-ignore
@@ -158,26 +153,15 @@ export default function Checkout() {
 
     setIsSubmitting(true);
 
-    // TikTok Track AddPaymentInfo
-    try {
-      // @ts-ignore
-      const ttq = window.ttq;
-      if (ttq) {
-        ttq.track("AddPaymentInfo", {
-          "contents": items.map(item => ({
-            "content_id": String(item.id),
-            "content_type": "product",
-            "content_name": item.name,
-            "quantity": item.quantity,
-            "price": item.price
-          })),
-          "value": subtotal,
-          "currency": "PKR"
-        });
-      }
-    } catch (e) {
-      console.error("TikTok AddPaymentInfo Error:", e);
-    }
+    trackTikTok("AddPaymentInfo", {
+      "contents": items.map(item => ({
+        "content_id": String(item.id),
+        "content_type": "product",
+        "content_name": item.name
+      })),
+      "value": subtotal,
+      "currency": "PKR"
+    });
 
     // Meta Pixel Track AddPaymentInfo
     try {
@@ -267,35 +251,36 @@ export default function Checkout() {
 
       // TikTok Track Purchase and PlaceAnOrder
       try {
-        // @ts-ignore
-        const ttq = window.ttq;
-        if (ttq) {
-          const hashedPhone = await hashData(formData.phone);
+        const hashedPhone = await hashData(formData.phone);
 
-          ttq.identify({
-            "phone_number": hashedPhone,
-          });
+        identifyTikTok({
+          "phone_number": hashedPhone,
+        });
 
-          const ttqContents = items.map(item => ({
-            "content_id": String(item.id),
-            "content_type": "product",
-            "content_name": item.name,
-            "quantity": item.quantity,
-            "price": item.price
-          }));
+        const ttqContents = items.map(item => ({
+          "content_id": String(item.id),
+          "content_type": "product",
+          "content_name": item.name
+        }));
 
-          ttq.track("Purchase", {
-            "contents": ttqContents,
-            "value": subtotal,
-            "currency": "PKR"
-          });
+        const ttqContentsWithPrice = items.map(item => ({
+          "content_id": String(item.id),
+          "content_type": "product",
+          "content_name": item.name,
+          "price": item.price
+        }));
 
-          ttq.track("PlaceAnOrder", {
-            "contents": ttqContents,
-            "value": subtotal,
-            "currency": "PKR"
-          });
-        }
+        trackTikTok("Purchase", {
+          "contents": ttqContents,
+          "value": subtotal,
+          "currency": "PKR"
+        });
+
+        trackTikTok("PlaceAnOrder", {
+          "contents": ttqContentsWithPrice,
+          "value": subtotal,
+          "currency": "PKR"
+        });
       } catch (e) {
         console.error("TikTok Tracking Error:", e);
       }

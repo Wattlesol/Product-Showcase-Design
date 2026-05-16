@@ -14,7 +14,7 @@ export default function ProductPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { addItem, items } = useCart();
-  const { trackEvent } = useTracker({ skipHit: true });
+  const { trackEvent, trackTikTok } = useTracker({ skipHit: true });
   const [selectedSize, setSelectedSize] = useState("");
 
   const productId = Number(params?.id);
@@ -47,24 +47,18 @@ export default function ProductPage() {
         productName: product.name,
         metadata: { price: product.price }
       });
-      // TikTok Track ViewContent
-      // @ts-ignore
-      const ttq = window.ttq;
-      if (ttq) {
-        ttq.track("ViewContent", {
-          "contents": [
-            {
-              "content_id": String(product.id),
-              "content_type": "product",
-              "content_name": product.name,
-              "quantity": 1,
-              "price": product.price
-            }
-          ],
-          "value": product.price,
-          "currency": "PKR"
-        });
-      }
+      trackTikTok("ViewContent", {
+        "contents": [
+          {
+            "content_id": String(product.id),
+            "content_type": "product",
+            "content_name": product.name,
+            "price": product.price
+          }
+        ],
+        "value": product.price,
+        "currency": "PKR"
+      });
 
       // Meta Pixel Track ViewContent
       // @ts-ignore
@@ -125,24 +119,17 @@ export default function ProductPage() {
       description: `${product.name} ${product.category === 'Shoes' ? `(${selectedVariant.color}, Size ${selectedSize})` : ''} has been added to your cart.`,
     });
 
-    // TikTok Track AddToCart
-    // @ts-ignore
-    const ttq = window.ttq;
-    if (ttq) {
-      ttq.track("AddToCart", {
-        "contents": [
-          {
-            "content_id": String(product.id),
-            "content_type": "product",
-            "content_name": product.name,
-            "quantity": 1,
-            "price": product.price
-          }
-        ],
-        "value": product.price,
-        "currency": "PKR"
-      });
-    }
+    trackTikTok("AddToCart", {
+      "contents": [
+        {
+          "content_id": String(product.id),
+          "content_type": "product",
+          "content_name": product.name
+        }
+      ],
+      "value": product.price,
+      "currency": "PKR"
+    });
 
     // Meta Pixel Track AddToCart
     // @ts-ignore
