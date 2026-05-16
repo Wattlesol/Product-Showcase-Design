@@ -17,6 +17,19 @@ export function useTracker(options: { skipHit?: boolean } = {}) {
     const trackHit = async () => {
       const urlParams = new URLSearchParams(window.location.search);
 
+      // 1. Fire Pixel events IMMEDIATELY (don't wait for internal API)
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'PageView');
+      }
+      // @ts-ignore
+      if (window.ttq) {
+        // @ts-ignore
+        window.ttq.page();
+      }
+
+      // 2. Then do internal tracking
       const hitData = {
         sessionId,
         path: window.location.pathname,
@@ -33,22 +46,8 @@ export function useTracker(options: { skipHit?: boolean } = {}) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(hitData),
         });
-        
-        // Meta Pixel Track PageView
-        // @ts-ignore
-        if (window.fbq) {
-          // @ts-ignore
-          window.fbq('track', 'PageView');
-        }
-
-        // TikTok Pixel Track PageView
-        // @ts-ignore
-        if (window.ttq) {
-          // @ts-ignore
-          window.ttq.page();
-        }
       } catch (e) {
-        console.error("Tracking failed", e);
+        console.error("Internal tracking hit failed", e);
       }
     };
 

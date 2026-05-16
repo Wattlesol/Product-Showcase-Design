@@ -50,6 +50,18 @@ export default function Checkout() {
         "currency": "PKR"
       });
 
+      trackTikTok("InitiateCheckout", {
+        "contents": items.map(item => ({
+          "content_id": String(item.id),
+          "content_type": "product",
+          "content_name": item.name,
+          "quantity": item.quantity,
+          "price": item.price
+        })),
+        "value": subtotal,
+        "currency": "PKR"
+      });
+
       // Meta Pixel Track InitiateCheckout
       // @ts-ignore
       if (window.fbq) {
@@ -260,13 +272,8 @@ export default function Checkout() {
         const ttqContents = items.map(item => ({
           "content_id": String(item.id),
           "content_type": "product",
-          "content_name": item.name
-        }));
-
-        const ttqContentsWithPrice = items.map(item => ({
-          "content_id": String(item.id),
-          "content_type": "product",
           "content_name": item.name,
+          "quantity": item.quantity,
           "price": item.price
         }));
 
@@ -277,7 +284,7 @@ export default function Checkout() {
         });
 
         trackTikTok("PlaceAnOrder", {
-          "contents": ttqContentsWithPrice,
+          "contents": ttqContents,
           "value": subtotal,
           "currency": "PKR"
         });

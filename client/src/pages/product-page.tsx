@@ -53,6 +53,7 @@ export default function ProductPage() {
             "content_id": String(product.id),
             "content_type": "product",
             "content_name": product.name,
+            "quantity": 1,
             "price": product.price
           }
         ],
@@ -124,7 +125,9 @@ export default function ProductPage() {
         {
           "content_id": String(product.id),
           "content_type": "product",
-          "content_name": product.name
+          "content_name": product.name,
+          "quantity": 1,
+          "price": product.price
         }
       ],
       "value": product.price,
